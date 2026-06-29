@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         ws.setDomStorageEnabled(true);
         ws.setDatabaseEnabled(true);
         ws.setCacheMode(WebSettings.LOAD_DEFAULT);
+        ws.setAllowFileAccess(true);
         ws.setAllowFileAccessFromFileURLs(true);
         ws.setAllowUniversalAccessFromFileURLs(true);
         ws.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
