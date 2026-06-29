@@ -97,14 +97,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Check for local OTA update file, validate it before loading
         File localUpdate = new File(getFilesDir(), "update/index.html");
-        if (localUpdate.exists() && localUpdate.canRead() && localUpdate.length() > 100) {
+        if (localUpdate.exists() && localUpdate.canRead() && localUpdate.length() > 100 && isValidHtmlFile(localUpdate)) {
             webView.loadUrl("file://" + localUpdate.getAbsolutePath());
         } else {
-            // Delete broken/empty OTA file if it exists
+            // Delete broken/empty/JSON OTA file if it exists
             if (localUpdate.exists()) localUpdate.delete();
             webView.loadUrl("file:///android_asset/index.html");
         }
-
 
         // ── AdMob banner ───────────────────────────────────
         MobileAds.initialize(this, status -> {});
@@ -119,6 +118,20 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (Exception e) {}
         registerOtaReceiver();
+    }
+
+    private boolean isValidHtmlFile(File file) {
+        try {
+            java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file));
+            String line = br.readLine();
+            br.close();
+            if (line != null) {
+                String trimmed = line.trim();
+                // If it starts with JSON curly brace, it's not HTML!
+                return !trimmed.startsWith("{") && !trimmed.startsWith("[");
+            }
+        } catch (Exception e) {}
+        return false;
     }
 
     private void registerOtaReceiver() {
