@@ -777,7 +777,7 @@
     /* Auto OTA Notification Banner */
     .update-banner {
       position: fixed;
-      bottom: 80px; /* Shifted up to avoid AdMob banner overlap */
+      bottom: 24px;
       left: 24px;
       right: 24px;
       background: var(--card);
@@ -861,29 +861,7 @@
     </div>
   </div>
 
-  <!-- Modern Settings Modal -->
-  <div id="settings-modal" class="modal-overlay">
-    <div class="modal-content">
-      <h3 class="modal-title">Налаштування OTA</h3>
-      <div style="font-size: 12px; line-height: 1.5; color: var(--muted-foreground); margin-bottom: 14px;">
-        Ви можете оновити інтерфейс (файл index.html) безпосередньо з GitHub без перевстановлення APK-файлу.
-      </div>
-      
-      <label style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--muted-foreground); letter-spacing: 0.5px;">Джерело оновлення (GitHub URL)</label>
-      <input type="text" id="settings-ota-url" class="settings-input" value="https://raw.githubusercontent.com/adweyn/svitlo-ua/main/version.json">
-      
-      <div style="margin-top: 14px; font-size: 11px; color: var(--muted-foreground);">
-        Активна версія інтерфейсу: <span id="settings-ota-version-badge" style="font-weight:700; color: var(--foreground);">1.0.0</span>
-      </div>
-      <div style="margin-top: 4px; font-size: 11px; color: var(--muted-foreground);">
-        Статус завантаження: <span id="settings-ota-status" style="font-weight:700; color: var(--foreground);">встановлено заводську версію</span>
-      </div>
 
-      <button class="settings-btn-primary" onclick="installOtaUpdate()">Встановити оновлення</button>
-      <button class="settings-btn-secondary" onclick="resetOtaUpdate()">Скинути оновлення</button>
-      <button class="settings-btn-secondary" style="border: 0; color: var(--muted-foreground);" onclick="toggleSettingsModal(false)">Закрити</button>
-    </div>
-  </div>
 
   <!-- Header Navigation row with Logo & Theme Selector -->
   <div class="header-logo-row">
@@ -898,9 +876,8 @@
     
     <div class="header-actions">
       <!-- Native Notification Test button -->
-      <button id="btn-test-notif" onclick="triggerTestNotif()" class="theme-toggle-btn" style="display:none;" aria-label="Тест сповіщень">🔔</button>
-      <!-- Settings gear button -->
-      <button onclick="toggleSettingsModal(true)" class="theme-toggle-btn" aria-label="Налаштування">⚙️</button>
+      <button id="btn-test-notif" onclick="triggerTestNotif()" class="theme-toggle-btn" style="display:none;" aria-label="Тест сповіщень"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
+      
       <button onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Зміна теми">
         <svg id="theme-btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
       </button>
@@ -935,19 +912,19 @@
         <div class="quick-grid">
           <button class="quick-card" onclick="selectRegionQuick('kyiv')">
             <span>м. Київ</span>
-            <span>🏛</span>
+            <span style="font-size:11px; font-weight:800; color:var(--muted-foreground);">KY</span>
           </button>
           <button class="quick-card" onclick="selectRegionQuick('kiivska-oblast')">
             <span>Київська обл.</span>
-            <span>🌿</span>
+            <span style="font-size:11px; font-weight:800; color:var(--muted-foreground);">KO</span>
           </button>
           <button class="quick-card" onclick="selectRegionQuick('lvivska-oblast')">
             <span>Львівська обл.</span>
-            <span>🦁</span>
+            <span style="font-size:11px; font-weight:800; color:var(--muted-foreground);">LV</span>
           </button>
           <button class="quick-card" onclick="selectRegionQuick('odeska-oblast')">
             <span>Одеська обл.</span>
-            <span>🌊</span>
+            <span style="font-size:11px; font-weight:800; color:var(--muted-foreground);">OD</span>
           </button>
         </div>
       </div>
@@ -1082,31 +1059,31 @@
     
     // Local metadata configuration for regions
     const REGION_META = {
-      'kiivska-oblast':           { name: 'Київська обл.', flag: '🌿', provider: 'ДТЕК Київські регіональні електромережі' },
-      'kyiv':                     { name: 'м. Київ', flag: '🏛', provider: 'ДТЕК Київські електромережі' },
-      'odeska-oblast':            { name: 'Одеська обл.', flag: '🌊', provider: 'ДТЕК Одеські електромережі' },
-      'dnipropetrovska-oblast':   { name: 'Дніпропетровська обл.', flag: '⛏', provider: 'ДТЕК Дніпровські електромережі' },
-      'lvivska-oblast':           { name: 'Львівська обл.', flag: '🦁', provider: 'Львівобленерго' },
-      'poltavska-oblast':         { name: 'Полтавська обл.', flag: '🌾', provider: 'Полтаваобленерго' },
-      'cherkaska-oblast':         { name: 'Черкаська обл.', flag: '⚓', provider: 'Черкасиобленерго' },
-      'chernihivska-oblast':      { name: 'Чернігівська обл.', flag: '🦅', provider: 'Чернігівобленерго' },
-      'kharkivska-oblast':        { name: 'Харківська обл.', flag: '🔬', provider: 'Харківобленерго' },
-      'zhytomyrska-oblast':       { name: 'Житомирська обл.', flag: '🌳', provider: 'Житомиробленерго' },
-      'sumska-oblast':            { name: 'Сумська обл.', flag: '🐻', provider: 'Сумиобленерго' },
-      'rivnenska-oblast':         { name: 'Рівненська обл.', flag: '🌲', provider: 'Рівнеобленерго' },
-      'ternopilska-oblast':       { name: 'Тернопільська обл.', flag: '🏺', provider: 'Тернопільобленерго' },
-      'ivano-frankivska-oblast':  { name: 'Івано-Франківська обл.', flag: '🏞', provider: 'Прикарпаттяобленерго' },
-      'khmelnytska-oblast':       { name: 'Хмельницька обл.', flag: '🏰', provider: 'Хмельницькобленерго' },
-      'zakarpatska-oblast':       { name: 'Закарпатська обл.', flag: '🏔', provider: 'Закарпаттяобленерго' },
-      'zaporizka-oblast':         { name: 'Запорізька обл.', flag: '⚙️', provider: 'Запоріжжяобленерго' },
-      'mykolaivska-oblast':       { name: 'Миколаївська обл.', flag: '⛵', provider: 'Миколаївобленерго' },
-      'vinnytska-oblast':         { name: 'Вінницька обл.', flag: '🌹', provider: 'Вінницяобленерго' },
-      'volynska-oblast':          { name: 'Волинська обл.', flag: '🦢', provider: 'Волиньобленерго' },
-      'kirovohradska-oblast':     { name: 'Кіровоградська обл.', flag: '🌻', provider: 'Кіровоградобленерго' },
-      'khersonska-oblast':        { name: 'Херсонська обл.', flag: '🌊', provider: 'Херсонобленерго' },
-      'chernivtska-oblast':       { name: 'Чернівецька обл.', flag: '🏔', provider: 'Чернівціобленерго' },
-      'dnipro-dnem':              { name: 'м. Дніпро (ДТЕК)', flag: '⚡', provider: 'ДТЕК Дніпровські електромережі' },
-      'dnipro-cek':               { name: 'м. Дніпро (ЦЕК)', flag: '🏢', provider: 'ЦЕК Дніпро' }
+      'kiivska-oblast':           { name: 'Київська обл.', flag: 'KO', provider: 'ДТЕК Київські регіональні електромережі' },
+      'kyiv':                     { name: 'м. Київ', flag: 'KY', provider: 'ДТЕК Київські електромережі' },
+      'odeska-oblast':            { name: 'Одеська обл.', flag: 'OD', provider: 'ДТЕК Одеські електромережі' },
+      'dnipropetrovska-oblast':   { name: 'Дніпропетровська обл.', flag: 'DP', provider: 'ДТЕК Дніпровські електромережі' },
+      'lvivska-oblast':           { name: 'Львівська обл.', flag: 'LV', provider: 'Львівобленерго' },
+      'poltavska-oblast':         { name: 'Полтавська обл.', flag: 'PL', provider: 'Полтаваобленерго' },
+      'cherkaska-oblast':         { name: 'Черкаська обл.', flag: 'CK', provider: 'Черкасиобленерго' },
+      'chernihivska-oblast':      { name: 'Чернігівська обл.', flag: 'CH', provider: 'Чернігівобленерго' },
+      'kharkivska-oblast':        { name: 'Харківська обл.', flag: 'HK', provider: 'Харківобленерго' },
+      'zhytomyrska-oblast':       { name: 'Житомирська обл.', flag: 'ZT', provider: 'Житомиробленерго' },
+      'sumska-oblast':            { name: 'Сумська обл.', flag: 'SM', provider: 'Сумиобленерго' },
+      'rivnenska-oblast':         { name: 'Рівненська обл.', flag: 'RV', provider: 'Рівнеобленерго' },
+      'ternopilska-oblast':       { name: 'Тернопільська обл.', flag: 'TP', provider: 'Тернопільобленерго' },
+      'ivano-frankivska-oblast':  { name: 'Івано-Франківська обл.', flag: 'IF', provider: 'Прикарпаттяобленерго' },
+      'khmelnytska-oblast':       { name: 'Хмельницька обл.', flag: 'HM', provider: 'Хмельницькобленерго' },
+      'zakarpatska-oblast':       { name: 'Закарпатська обл.', flag: 'ZK', provider: 'Закарпаттяобленерго' },
+      'zaporizka-oblast':         { name: 'Запорізька обл.', flag: 'ZP', provider: 'Запоріжжяобленерго' },
+      'mykolaivska-oblast':       { name: 'Миколаївська обл.', flag: 'MK', provider: 'Миколаївобленерго' },
+      'vinnytska-oblast':         { name: 'Вінницька обл.', flag: 'VN', provider: 'Вінницяобленерго' },
+      'volynska-oblast':          { name: 'Волинська обл.', flag: 'VL', provider: 'Волиньобленерго' },
+      'kirovohradska-oblast':     { name: 'Кіровоградська обл.', flag: 'KH', provider: 'Кіровоградобленерго' },
+      'khersonska-oblast':        { name: 'Херсонська обл.', flag: 'HS', provider: 'Херсонобленерго' },
+      'chernivtska-oblast':       { name: 'Чернівецька обл.', flag: 'CV', provider: 'Чернівціобленерго' },
+      'dnipro-dnem':              { name: 'м. Дніпро (ДТЕК)', flag: 'DN', provider: 'ДТЕК Дніпровські електромережі' },
+      'dnipro-cek':               { name: 'м. Дніпро (ЦЕК)', flag: 'DC', provider: 'ЦЕК Дніпро' }
     };
 
     const UKRAINIAN_DAYS = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П\'ятниця', 'Субота'];
@@ -1555,7 +1532,7 @@
       panel.appendChild(title);
 
       filtered.forEach(region => {
-        const meta = REGION_META[region.cpu] || { name: region.name_ua, flag: '📍', provider: 'Обленерго' };
+        const meta = REGION_META[region.cpu] || { name: region.name_ua, flag: '--', provider: 'Обленерго' };
         
         const btn = document.createElement('button');
         btn.className = 'region-item';

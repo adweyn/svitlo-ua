@@ -76,15 +76,32 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url != null && url.startsWith("file://")) { view.loadUrl(url); return true; }
-                try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); } catch (Exception e) {}
+                if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
+                    try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); } catch (Exception e) {}
+                    return true;
+                }
                 return true;
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                // If OTA update file fails to load, delete it and fall back to bundled asset
+                if (failingUrl != null && failingUrl.contains("update/index.html")) {
+                    File broken = new File(getFilesDir(), "update/index.html");
+                    if (broken.exists()) broken.delete();
+                    view.loadUrl("file:///android_asset/index.html");
+                }
             }
         });
         webView.setWebChromeClient(new WebChromeClient());
+
+        // Check for local OTA update file, validate it before loading
         File localUpdate = new File(getFilesDir(), "update/index.html");
-        if (localUpdate.exists()) {
+        if (localUpdate.exists() && localUpdate.canRead() && localUpdate.length() > 100) {
             webView.loadUrl("file://" + localUpdate.getAbsolutePath());
         } else {
+            // Delete broken/empty OTA file if it exists
+            if (localUpdate.exists()) localUpdate.delete();
             webView.loadUrl("file:///android_asset/index.html");
         }
 
