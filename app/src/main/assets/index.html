@@ -1440,10 +1440,13 @@
 
       // 1. Try Live API Fetch
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
         const response = await fetch(API_URL, {
           headers: { 'Accept': 'application/json' },
-          signal: AbortSignal.timeout(4000)
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
         if (response.ok) {
           const rawJson = await response.json();
           data = JSON.parse(rawJson.body);
