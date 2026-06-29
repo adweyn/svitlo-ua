@@ -1,0 +1,7 @@
+{
+  "appVersion": "5.0",
+  "apkUrl": "https://raw.githubusercontent.com/adweyn/svitlo-ua/main/app-release.apk",
+  "webVersion": "1.0.0",
+  "url": "https://raw.githubusercontent.com/adweyn/svitlo-ua/main/app/src/main/assets/index.html",
+  "changelog": "Початковий SaaS-дизайн"
+}

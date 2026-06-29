@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Світло UA</title>
+  <!-- Modern Premium Typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Clean Corporate Design System (Inspired by Apple, Linear, Stripe) */
+    :root {
+      /* Dark Theme (Default) */
+      --background: #09090b; /* Zinc 950 */
+      --foreground: #fafafa; /* Zinc 50 */
+      --card: #18181b;       /* Zinc 900 */
+      --border: #27272a;     /* Zinc 800 */
+      --muted: #27272a;      /* Zinc 800 */
+      --muted-foreground: #a1a1aa; /* Zinc 400 */
+      --primary: #fafafa;
+      --primary-foreground: #09090b;
+      
+      /* Muted Corporate Outage Status Colors */
+      --color-s-yes: #34d399;       /* Dry Mint Green */
+      --color-s-yes-bg: #064e3b;    /* Emerald 950 */
+      --color-s-yes-border: #047857;/* Emerald 700 */
+      
+      --color-s-maybe: #fbbf24;     /* Amber Slate */
+      --color-s-maybe-bg: #451a03;   /* Amber 950 */
+      --color-s-maybe-border: #78350f;/* Amber 700 */
+      
+      --color-s-no: #f87171;        /* Restrained Matte Red */
+      --color-s-no-bg: #450a0a;     /* Dark Red 950 */
+      --color-s-no-border: #7f1d1d; /* Dark Red 900 */
+    }
+
+    body.light-theme {
+      /* Light Theme Overrides */
+      --background: #ffffff;
+      --foreground: #09090b; /* Zinc 950 */
+      --card: #f4f4f5;       /* Zinc 100 */
+      --border: #e4e4e7;     /* Zinc 200 */
+      --muted: #e4e4e7;      /* Zinc 200 */
+      --muted-foreground: #71717a; /* Zinc 500 */
+      --primary: #09090b;
+      --primary-foreground: #ffffff;
+      
+      /* Light Muted Corporate Outage Status Colors */
+      --color-s-yes: #065f46;       /* Dry Mint Green */
+      --color-s-yes-bg: #d1fae5;    /* Emerald 100 */
+      --color-s-yes-border: #a7f3d0;/* Emerald 200 */
+      
+      --color-s-maybe: #92400e;     /* Amber Slate */
+      --color-s-maybe-bg: #fef3c7;    /* Amber 100 */
+      --color-s-maybe-border: #fde68a;/* Amber 200 */
+      
+      --color-s-no: #991b1b;        /* Restrained Matte Red */
+      --color-s-no-bg: #fee2e2;     /* Red 100 */
+      --color-s-no-border: #fca5a5; /* Red 200 */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      padding: 24px;
+      padding-bottom: 56px;
+      overflow-x: hidden;
+      transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Spring Animations Presets */
+    body, .status-card, .search-input-wrapper, .segment-item, .matrix-container, .btn-back, .logo-box, .glow-box, .slot-card, .quick-card, .tab-btn, .group-btn {
+      transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                  border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                  color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                  transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Tactile Tap feedback */
+    button:active, .quick-card:active, .segment-item:active, .tab-btn:active, .group-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Main Navigation Header */
+    .header-logo-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      width: 100%;
+    }
+    .header-logo-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-box svg {
+      stroke: var(--primary-foreground);
+    }
+    .logo-text {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .theme-toggle-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--foreground);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      outline: none;
+    }
+    .theme-toggle-btn:hover {
+      border-color: var(--muted-foreground);
+    }
+
+    /* Clean Search Bar wrapper */
+    .search-box {
+      position: relative;
+      width: 100%;
+      margin-bottom: 24px;
+      z-index: 50;
+    }
+    .search-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .search-input-wrapper:focus-within {
+      border-color: var(--muted-foreground);
+    }
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: 0;
+      outline: none;
+      color: var(--foreground);
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .search-input::placeholder {
+      color: var(--muted-foreground);
+    }
+    .current-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--muted);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--foreground);
+    }
+
+    /* Dropdown panel */
+    .dropdown-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      max-height: 320px;
+      overflow-y: auto;
+      display: none;
+      padding: 8px;
+      z-index: 100;
+    }
+    .dropdown-panel.open {
+      display: block;
+    }
+    .dropdown-title {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+      letter-spacing: 1px;
+      padding: 8px 12px;
+    }
+    .region-item {
+      width: 100%;
+      background: transparent;
+      border: 0;
+      outline: none;
+      color: var(--foreground);
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+    .region-item:hover {
+      background: var(--muted);
+    }
+    .region-name {
+      font-size: 13.5px;
+      font-weight: 700;
+    }
+    .region-provider {
+      font-size: 10px;
+      color: var(--muted-foreground);
+      margin-top: 2px;
+    }
+    .region-tag {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .tag-dtek {
+      background: var(--muted);
+      color: var(--color-s-maybe);
+      border: 1px solid var(--border);
+    }
+    .tag-std {
+      background: var(--muted);
+      color: var(--color-s-yes);
+      border: 1px solid var(--border);
+    }
+
+    /* Queue buttons grid - 3 Columns Compact Grid */
+    .group-selection-grid {
+      display: grid;
+      grid-template-cols: repeat(3, 1fr);
+      gap: 12px;
+      padding: 8px;
+    }
+    .group-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--foreground);
+      padding: 16px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-align: center;
+    }
+    .group-btn:hover {
+      border-color: var(--muted-foreground);
+    }
+    .group-btn.active {
+      background: var(--foreground);
+      color: var(--background);
+      border-color: var(--foreground);
+    }
+    .group-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+    .group-subtitle {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+      letter-spacing: 0.5px;
+    }
+
+    /* Quick cards */
+    .quick-links {
+      width: 100%;
+      margin-top: 24px;
+    }
+    .quick-grid {
+      display: grid;
+      grid-template-cols: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .quick-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--foreground);
+    }
+
+    /* Status Card Panel */
+    .status-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .status-tagline {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+      letter-spacing: 1px;
+    }
+    .status-place {
+      font-size: 16px;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+    
+    /* Flat Status Alert Panel */
+    .glow-box {
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+    }
+    .glow-yes {
+      background: var(--color-s-yes-bg);
+      border-color: var(--color-s-yes-border);
+      color: var(--color-s-yes);
+    }
+    .glow-maybe {
+      background: var(--color-s-maybe-bg);
+      border-color: var(--color-s-maybe-border);
+      color: var(--color-s-maybe);
+    }
+    .glow-no {
+      background: var(--color-s-no-bg);
+      border-color: var(--color-s-no-border);
+      color: var(--color-s-no);
+    }
+    
+    .status-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status-name-large {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      animation: pulse 1.6s infinite;
+    }
+    .pulse-yes { background-color: var(--color-s-yes); }
+    .pulse-maybe { background-color: var(--color-s-maybe); }
+    .pulse-no { background-color: var(--color-s-no); }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    .countdown-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 14px;
+    }
+    .timer-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--muted-foreground);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .timer-val {
+      font-size: 22px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+    
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: var(--muted);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      width: 0%;
+      transition: width 1s ease-out;
+    }
+    .fill-yes { background: var(--color-s-yes); }
+    .fill-maybe { background: var(--color-s-maybe); }
+    .fill-no { background: var(--color-s-no); }
+
+    /* Segmented Tabs (Today / Tomorrow / History) */
+    .main-tab-bar {
+      display: flex;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: 0;
+      outline: none;
+      color: var(--muted-foreground);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .tab-btn.active {
+      background: var(--background);
+      color: var(--foreground);
+      border: 1px solid var(--border);
+    }
+
+    /* Queue control segment tabs */
+    .dashboard-segment {
+      display: flex;
+      overflow-x: auto;
+      gap: 6px;
+      padding: 4px;
+      background: var(--card);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      scrollbar-width: none;
+    }
+    .dashboard-segment::-webkit-scrollbar {
+      display: none;
+    }
+    .segment-item {
+      flex: 1;
+      min-width: 65px;
+      background: transparent;
+      border: 0;
+      outline: none;
+      color: var(--muted-foreground);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .segment-item.active {
+      background: var(--background);
+      color: var(--foreground);
+      border: 1px solid var(--border);
+    }
+
+    /* Outages timeline container */
+    .matrix-container {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .matrix-grid {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    /* Horizontal flex bar */
+    .matrix-row {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      gap: 8px;
+    }
+    .matrix-day-label {
+      width: 65px;
+      flex-shrink: 0;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--foreground);
+      line-height: 1.1;
+    }
+    .matrix-cells-container {
+      display: flex;
+      flex-grow: 1;
+      gap: 2px;
+      width: calc(100% - 65px);
+    }
+    .matrix-cell {
+      flex: 1;
+      height: 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      min-width: 4px;
+    }
+    .cell-yes { background: var(--color-s-yes-bg); border: 1px solid var(--color-s-yes-border); }
+    .cell-maybe { background: var(--color-s-maybe-bg); border: 1px solid var(--color-s-maybe-border); }
+    .cell-no { background: var(--color-s-no-bg); border: 1px solid var(--color-s-no-border); }
+    .cell-current {
+      box-shadow: 0 0 0 2.5px var(--foreground);
+      z-index: 10;
+    }
+
+    /* Hours spacer header */
+    .matrix-hours-header {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .matrix-hours-spacer {
+      width: 65px;
+      flex-shrink: 0;
+    }
+    .matrix-hours-container {
+      display: flex;
+      flex-grow: 1;
+      justify-content: space-between;
+      width: calc(100% - 65px);
+      padding: 0 4px;
+    }
+    .matrix-hour-label {
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--muted-foreground);
+      width: 16px;
+      text-align: center;
+    }
+
+    /* Grouped timeline slots cards */
+    .timeline-slots-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      margin-top: 24px;
+    }
+    .slots-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .slot-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .slot-time-range {
+      font-size: 13.5px;
+      font-weight: 800;
+    }
+    .slot-duration {
+      font-size: 11px;
+      color: var(--muted-foreground);
+      margin-left: 6px;
+      font-weight: 600;
+    }
+    .slot-info {
+      font-size: 11.5px;
+      color: var(--muted-foreground);
+      margin-top: 2px;
+    }
+    .slot-badge {
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+    }
+
+    /* Accordion History Panel */
+    .history-card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .history-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .history-day-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--foreground);
+    }
+    .history-card-details {
+      margin-top: 14px;
+      display: none;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+    .history-card.expanded {
+      border-color: var(--muted-foreground);
+    }
+    .history-card.expanded .history-card-details {
+      display: block;
+    }
+
+    /* Floating Tooltip Bubble */
+    .tooltip-bubble {
+      position: absolute;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      font-size: 11.5px;
+      pointer-events: none;
+      display: none;
+      z-index: 100;
+      max-width: 190px;
+    }
+
+    /* Back buttons */
+    .btn-back {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--foreground);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    /* Modern Overlay Modal for Settings */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(9, 9, 11, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      width: 90%;
+      max-width: 380px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      transform: scale(0.95);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-overlay.open .modal-content {
+      transform: scale(1);
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .settings-input {
+      width: 100%;
+      background: var(--background);
+      border: 1px solid var(--border);
+      color: var(--foreground);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-top: 8px;
+      outline: none;
+      font-family: monospace;
+    }
+    .settings-btn-primary {
+      width: 100%;
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border: 0;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13.5px;
+      cursor: pointer;
+      margin-top: 14px;
+    }
+    .settings-btn-secondary {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--foreground);
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13.5px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    /* Auto OTA Notification Banner */
+    .update-banner {
+      position: fixed;
+      bottom: 80px; /* Shifted up to avoid AdMob banner overlap */
+      left: 24px;
+      right: 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.4);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transform: translateY(100px);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s;
+      opacity: 0;
+    }
+    .update-banner.show {
+      display: flex;
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .update-btn-install {
+      background: var(--foreground);
+      color: var(--background);
+      border: 0;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Native In-App Download Progress Modal */
+    #num-modal-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    #num-modal-desc {
+      font-size: 12px;
+      color: var(--muted-foreground);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Tooltip Container -->
+  <div id="tooltip" class="tooltip-bubble"></div>
+
+  <!-- Auto OTA Update Alert Banner -->
+  <div id="update-banner" class="update-banner"></div>
+
+  <!-- Native Update Progress Modal -->
+  <div id="native-update-modal" class="modal-overlay">
+    <div class="modal-content" style="text-align: center; max-width: 320px;">
+      <h3 id="num-modal-title">Оновлення додатка</h3>
+      <div id="num-modal-desc">
+        Завантаження нової версії APK-файлу...
+      </div>
+      
+      <!-- Progress Bar -->
+      <div class="progress-bar-bg" style="height: 8px; margin-bottom: 12px;">
+        <div id="num-progress-fill" class="progress-bar-fill fill-yes" style="width: 0%;"></div>
+      </div>
+      
+      <div id="num-progress-text" style="font-size: 11px; font-weight: 700; color: var(--foreground); margin-bottom: 20px;">
+        Підготовка до завантаження...
+      </div>
+      
+      <div id="num-error-actions" class="hidden" style="margin-top: 10px;">
+        <button class="settings-btn-primary" onclick="retryNativeUpdate()">Спробувати знову</button>
+      </div>
+      
+      <button id="num-cancel-btn" class="settings-btn-secondary" style="border: 0; color: var(--muted-foreground); margin-top: 8px;" onclick="cancelNativeUpdate()">Скасувати</button>
+    </div>
+  </div>
+
+  <!-- Modern Settings Modal -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 class="modal-title">Налаштування OTA</h3>
+      <div style="font-size: 12px; line-height: 1.5; color: var(--muted-foreground); margin-bottom: 14px;">
+        Ви можете оновити інтерфейс (файл index.html) безпосередньо з GitHub без перевстановлення APK-файлу.
+      </div>
+      
+      <label style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--muted-foreground); letter-spacing: 0.5px;">Джерело оновлення (GitHub URL)</label>
+      <input type="text" id="settings-ota-url" class="settings-input" value="https://raw.githubusercontent.com/adweyn/svitlo-ua/main/version.json">
+      
+      <div style="margin-top: 14px; font-size: 11px; color: var(--muted-foreground);">
+        Активна версія інтерфейсу: <span id="settings-ota-version-badge" style="font-weight:700; color: var(--foreground);">1.0.0</span>
+      </div>
+      <div style="margin-top: 4px; font-size: 11px; color: var(--muted-foreground);">
+        Статус завантаження: <span id="settings-ota-status" style="font-weight:700; color: var(--foreground);">встановлено заводську версію</span>
+      </div>
+
+      <button class="settings-btn-primary" onclick="installOtaUpdate()">Встановити оновлення</button>
+      <button class="settings-btn-secondary" onclick="resetOtaUpdate()">Скинути оновлення</button>
+      <button class="settings-btn-secondary" style="border: 0; color: var(--muted-foreground);" onclick="toggleSettingsModal(false)">Закрити</button>
+    </div>
+  </div>
+
+  <!-- Header Navigation row with Logo & Theme Selector -->
+  <div class="header-logo-row">
+    <div class="header-logo-left">
+      <div class="logo-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <span class="logo-text">СВІТЛО UA</span>
+    </div>
+    
+    <div class="header-actions">
+      <!-- Native Notification Test button -->
+      <button id="btn-test-notif" onclick="triggerTestNotif()" class="theme-toggle-btn" style="display:none;" aria-label="Тест сповіщень">🔔</button>
+      <!-- Settings gear button -->
+      <button onclick="toggleSettingsModal(true)" class="theme-toggle-btn" aria-label="Налаштування">⚙️</button>
+      <button onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Зміна теми">
+        <svg id="theme-btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div id="app-container">
+
+    <!-- Landing screen -->
+    <div id="screen-landing" class="landing-screen">
+      <div class="logo-box" style="width:48px; height:48px; border-radius:12px; margin-bottom:14px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <h1 style="font-size:25px; font-weight:800; letter-spacing:-0.5px;">Графіки відключень</h1>
+      <p style="font-size:13px; color:var(--muted-foreground); max-w:270px; line-height:1.4; margin-top: 4px;">Дійсні графіки відключень від постачальників послуг в реальному часі.</p>
+      
+      <!-- Address selector search input -->
+      <div class="search-box" style="margin-top: 18px;">
+        <div class="search-input-wrapper" onclick="toggleDropdown(true)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="landing-search" class="search-input" placeholder="Пошук області..." oninput="filterRegions(this.value)">
+        </div>
+        <div id="landing-dropdown" class="dropdown-panel"></div>
+      </div>
+
+      <!-- Quick access buttons -->
+      <div class="quick-links">
+        <h3 class="dropdown-title" style="text-align: left; padding-left: 0; margin-bottom: 8px;">Швидкий доступ</h3>
+        <div class="quick-grid">
+          <button class="quick-card" onclick="selectRegionQuick('kyiv')">
+            <span>м. Київ</span>
+            <span>🏛</span>
+          </button>
+          <button class="quick-card" onclick="selectRegionQuick('kiivska-oblast')">
+            <span>Київська обл.</span>
+            <span>🌿</span>
+          </button>
+          <button class="quick-card" onclick="selectRegionQuick('lvivska-oblast')">
+            <span>Львівська обл.</span>
+            <span>🦁</span>
+          </button>
+          <button class="quick-card" onclick="selectRegionQuick('odeska-oblast')">
+            <span>Одеська обл.</span>
+            <span>🌊</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group selection sub-screen -->
+    <div id="screen-group-select" class="hidden animate-in fade-in">
+      <button class="btn-back" onclick="goToScreen('landing')">← Назад до пошуку</button>
+      <h2 id="select-group-title" style="font-size: 16px; font-weight:800; margin-bottom: 4px;">Оберіть чергу для перегляду</h2>
+      <p id="select-group-provider" style="font-size:11.5px; color:var(--muted-foreground); margin-bottom:16px;"></p>
+      
+      <div id="group-buttons-container" class="group-selection-grid"></div>
+    </div>
+
+    <!-- Main Dashboard screen -->
+    <div id="screen-dashboard" class="hidden">
+      
+      <!-- Back button -->
+      <button class="btn-back" onclick="goToScreen('landing')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Змінити область
+      </button>
+
+      <!-- Selector combobox in dashboard -->
+      <div class="search-box">
+        <div class="search-input-wrapper" onclick="toggleDropdownDash(true)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="dash-search" class="search-input" placeholder="Пошук області..." oninput="filterRegionsDash(this.value)">
+          <div id="dash-current-badge" class="current-badge"></div>
+        </div>
+        <div id="dash-dropdown" class="dropdown-panel"></div>
+      </div>
+
+      <!-- Outage Status Card -->
+      <div class="status-card">
+        <div class="status-header">
+          <div>
+            <div class="status-tagline">Поточний стан</div>
+            <div id="status-display-place" class="status-place">Регіон</div>
+          </div>
+          <div style="text-align: right;">
+            <div id="status-display-provider" style="font-size: 9px; color: var(--muted-foreground);">Постачальник</div>
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 3px;">
+              <span id="connection-status-badge" style="font-size: 8.5px; font-weight: 800; color: var(--muted-foreground);">Оновлення...</span>
+              <button onclick="refreshCurrentSchedule()" style="background: transparent; border: 0; cursor: pointer; color: var(--muted-foreground); display: flex; align-items: center; padding: 2px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="status-glow" class="glow-box">
+          <div class="status-icon-box">
+            <svg id="status-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+          </div>
+          <div>
+            <div class="status-name-large">
+              <span id="status-pulse" class="status-pulse-dot"></span>
+              <span id="status-title-text">СТАТУС</span>
+            </div>
+            <div id="status-desc-text" style="font-size: 11.5px; margin-top: 2px;">Опис стану...</div>
+          </div>
+        </div>
+
+        <div class="countdown-section">
+          <div>
+            <div class="timer-label">Залишилось часу</div>
+            <div id="timer-countdown" class="timer-val">00:00:00</div>
+          </div>
+          <div style="text-align: right;">
+            <div id="timer-action-label" style="font-size: 9px; color: var(--muted-foreground);">до змін</div>
+            <div id="timer-next-badge" class="region-tag" style="margin-top: 3px;">—</div>
+          </div>
+        </div>
+
+        <div class="progress-bar-bg">
+          <div id="timer-progress" class="progress-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Segmented Control for Queues/Groups -->
+      <div id="queue-segment-bar" class="dashboard-segment"></div>
+
+      <!-- Main Segment Selector: Сьогодні / Завтра / Історія -->
+      <div class="main-tab-bar">
+        <button id="tab-btn-today" class="tab-btn active" onclick="switchMainTab('today')">Сьогодні</button>
+        <button id="tab-btn-tomorrow" class="tab-btn" onclick="switchMainTab('tomorrow')">Завтра</button>
+        <button id="tab-btn-history" class="tab-btn" onclick="switchMainTab('history')">Історія (3 дні)</button>
+      </div>
+
+      <!-- Today / Tomorrow Content View -->
+      <div id="view-timeline-tabs">
+        <div class="matrix-container">
+          <!-- Hours Header -->
+          <div class="matrix-hours-header">
+            <div class="matrix-hours-spacer"></div>
+            <div class="matrix-hours-container">
+              <span class="matrix-hour-label">00</span>
+              <span class="matrix-hour-label">04</span>
+              <span class="matrix-hour-label">08</span>
+              <span class="matrix-hour-label">12</span>
+              <span class="matrix-hour-label">16</span>
+              <span class="matrix-hour-label">20</span>
+            </div>
+          </div>
+          
+          <!-- Single row Grid Bar -->
+          <div id="matrix-single-row-container" class="matrix-grid"></div>
+        </div>
+        
+        <!-- Grouped Time Slots list below -->
+        <h3 class="timeline-slots-title">Погодинний огляд дня</h3>
+        <div id="timeline-slots-list" class="slots-container"></div>
+      </div>
+
+      <!-- History (3 past days) Content View -->
+      <div id="view-history-tab" class="hidden">
+        <div id="history-days-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    'use strict';
+    
+    // Live worker API endpoint configuration
+    const API_URL = 'https://dtek-api.svitlo-proxy.workers.dev/';
+    const CACHE_KEY = 'svitlo_cache_v5';
+    const VERSION_CHECK_URL = 'https://raw.githubusercontent.com/adweyn/svitlo-ua/main/version.json';
+    
+    // Local metadata configuration for regions
+    const REGION_META = {
+      'kiivska-oblast':           { name: 'Київська обл.', flag: '🌿', provider: 'ДТЕК Київські регіональні електромережі' },
+      'kyiv':                     { name: 'м. Київ', flag: '🏛', provider: 'ДТЕК Київські електромережі' },
+      'odeska-oblast':            { name: 'Одеська обл.', flag: '🌊', provider: 'ДТЕК Одеські електромережі' },
+      'dnipropetrovska-oblast':   { name: 'Дніпропетровська обл.', flag: '⛏', provider: 'ДТЕК Дніпровські електромережі' },
+      'lvivska-oblast':           { name: 'Львівська обл.', flag: '🦁', provider: 'Львівобленерго' },
+      'poltavska-oblast':         { name: 'Полтавська обл.', flag: '🌾', provider: 'Полтаваобленерго' },
+      'cherkaska-oblast':         { name: 'Черкаська обл.', flag: '⚓', provider: 'Черкасиобленерго' },
+      'chernihivska-oblast':      { name: 'Чернігівська обл.', flag: '🦅', provider: 'Чернігівобленерго' },
+      'kharkivska-oblast':        { name: 'Харківська обл.', flag: '🔬', provider: 'Харківобленерго' },
+      'zhytomyrska-oblast':       { name: 'Житомирська обл.', flag: '🌳', provider: 'Житомиробленерго' },
+      'sumska-oblast':            { name: 'Сумська обл.', flag: '🐻', provider: 'Сумиобленерго' },
+      'rivnenska-oblast':         { name: 'Рівненська обл.', flag: '🌲', provider: 'Рівнеобленерго' },
+      'ternopilska-oblast':       { name: 'Тернопільська обл.', flag: '🏺', provider: 'Тернопільобленерго' },
+      'ivano-frankivska-oblast':  { name: 'Івано-Франківська обл.', flag: '🏞', provider: 'Прикарпаттяобленерго' },
+      'khmelnytska-oblast':       { name: 'Хмельницька обл.', flag: '🏰', provider: 'Хмельницькобленерго' },
+      'zakarpatska-oblast':       { name: 'Закарпатська обл.', flag: '🏔', provider: 'Закарпаттяобленерго' },
+      'zaporizka-oblast':         { name: 'Запорізька обл.', flag: '⚙️', provider: 'Запоріжжяобленерго' },
+      'mykolaivska-oblast':       { name: 'Миколаївська обл.', flag: '⛵', provider: 'Миколаївобленерго' },
+      'vinnytska-oblast':         { name: 'Вінницька обл.', flag: '🌹', provider: 'Вінницяобленерго' },
+      'volynska-oblast':          { name: 'Волинська обл.', flag: '🦢', provider: 'Волиньобленерго' },
+      'kirovohradska-oblast':     { name: 'Кіровоградська обл.', flag: '🌻', provider: 'Кіровоградобленерго' },
+      'khersonska-oblast':        { name: 'Херсонська обл.', flag: '🌊', provider: 'Херсонобленерго' },
+      'chernivtska-oblast':       { name: 'Чернівецька обл.', flag: '🏔', provider: 'Чернівціобленерго' },
+      'dnipro-dnem':              { name: 'м. Дніпро (ДТЕК)', flag: '⚡', provider: 'ДТЕК Дніпровські електромережі' },
+      'dnipro-cek':               { name: 'м. Дніпро (ЦЕК)', flag: '🏢', provider: 'ЦЕК Дніпро' }
+    };
+
+    const UKRAINIAN_DAYS = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П\'ятниця', 'Субота'];
+
+    // Local state variables
+    let S = {
+      currentRegionId: '',
+      currentQueue: '',
+      activeTab: 'today',
+      apiData: null,
+      updateInterval: null,
+      theme: 'dark',
+      pendingApkUrl: ''
+    };
+
+    window.onload = function() {
+      // Complete pending OTA version transitions
+      const pendingVersion = localStorage.getItem('svitlo_web_pending_version');
+      if (pendingVersion) {
+        localStorage.setItem('svitlo_web_version', pendingVersion);
+        localStorage.removeItem('svitlo_web_pending_version');
+      }
+
+      initTheme();
+      checkBridge();
+      updateOtaStatusDisplay();
+      
+      const currentVer = localStorage.getItem('svitlo_web_version') || '1.0.0';
+      document.getElementById('settings-ota-version-badge').innerText = currentVer;
+
+      const savedRegion = localStorage.getItem('svitlo_region_id_v5');
+      const savedQueue = localStorage.getItem('svitlo_queue_v5');
+      
+      if (savedRegion && savedQueue) {
+        S.currentRegionId = savedRegion;
+        S.currentQueue = savedQueue;
+        loadApiDataAndInitialize();
+      } else {
+        loadApiDataAndInitialize(true); // first load
+      }
+
+      // Check for available OTA updates from GitHub on boot
+      setTimeout(checkForOtaUpdates, 3000);
+    };
+
+    // GitHub Version Checker & OTA Updater Logic
+    async function checkForOtaUpdates() {
+      if (!window.AndroidBridge) return;
+      try {
+        const response = await fetch(VERSION_CHECK_URL, { cache: 'no-store' });
+        if (response.ok) {
+          const remote = await response.json();
+          
+          // 1. Check for native APK update (Google Play Store / Release APK)
+          const nativeVer = window.AndroidBridge.getAppVersion() || '5.0';
+          if (isVersionNewer(remote.appVersion, nativeVer)) {
+            showNativeUpdateBanner(remote);
+            return; // Native update has priority!
+          }
+          
+          // 2. Check for web HTML layout update (OTA)
+          const localVer = localStorage.getItem('svitlo_web_version') || '1.0.0';
+          if (isVersionNewer(remote.webVersion, localVer)) {
+            showWebUpdateBanner(remote);
+          }
+        }
+      } catch (err) {
+        console.warn('OTA version check failed', err);
+      }
+    }
+
+    function isVersionNewer(remote, local) {
+      const r = remote.split('.').map(Number);
+      const l = local.split('.').map(Number);
+      for (let i = 0; i < Math.max(r.length, l.length); i++) {
+        const rn = r[i] || 0;
+        const ln = l[i] || 0;
+        if (rn > ln) return true;
+        if (rn < ln) return false;
+      }
+      return false;
+    }
+
+    function showNativeUpdateBanner(info) {
+      const banner = document.getElementById('update-banner');
+      banner.innerHTML = `
+        <div style="flex:1;">
+          <div style="font-size:12px; font-weight:800; color:var(--foreground);">Нова версія додатка (в. ${info.appVersion})</div>
+          <div style="font-size:10px; color:var(--muted-foreground); margin-top:2px;">Доступне велике оновлення в Google Play</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="update-btn-install" onclick="openApkUpdate('${info.apkUrl}')">Оновити</button>
+          <button onclick="dismissUpdateBanner()" style="background:transparent; border:0; color:var(--muted-foreground); font-size:11px; font-weight:700; cursor:pointer; padding:6px 10px;">Пізніше</button>
+        </div>
+      `;
+      banner.style.display = 'flex';
+      setTimeout(() => banner.classList.add('show'), 100);
+    }
+
+    function openApkUpdate(url) {
+      dismissUpdateBanner();
+      
+      if (url.includes('play.google.com') || url.includes('market://')) {
+        // Redirection to the Play Store
+        window.open(url, '_blank');
+      } else {
+        // Direct APK download and install
+        S.pendingApkUrl = url;
+        startApkDownloadFlow();
+      }
+    }
+
+    // Direct APK installation helper flow
+    function startApkDownloadFlow() {
+      if (!window.AndroidBridge) return;
+      
+      document.getElementById('native-update-modal').classList.add('open');
+      document.getElementById('num-progress-fill').style.width = '0%';
+      document.getElementById('num-progress-text').innerText = 'Підготовка до завантаження...';
+      document.getElementById('num-error-actions').classList.add('hidden');
+      document.getElementById('num-cancel-btn').classList.remove('hidden');
+
+      // Call native bridge to download APK
+      window.AndroidBridge.downloadApk(S.pendingApkUrl);
+    }
+
+    // Native callbacks bound to AndroidBridge progress reporter
+    window.onOtaProgress = function(percent, done, total) {
+      const fill = document.getElementById('num-progress-fill');
+      const text = document.getElementById('num-progress-text');
+      
+      if (percent >= 0) {
+        fill.style.width = `${percent}%`;
+        const sizeMb = (total / (1024 * 1024)).toFixed(1);
+        const doneMb = (done / (1024 * 1024)).toFixed(1);
+        text.innerText = `Завантажено ${doneMb} МБ з ${sizeMb} МБ (${percent}%)`;
+      } else if (done > 0) {
+        fill.style.width = '45%'; // indefinite progress
+        const doneMb = (done / (1024 * 1024)).toFixed(1);
+        text.innerText = `Завантажено ${doneMb} МБ (розмір невідомий)...`;
+      } else {
+        text.innerText = 'Початок завантаження...';
+      }
+    };
+
+    window.onOtaDownloadComplete = function(success, pathOrError) {
+      const text = document.getElementById('num-progress-text');
+      const fill = document.getElementById('num-progress-fill');
+      
+      if (success) {
+        fill.style.width = '100%';
+        text.innerText = 'Завантаження завершено! Запуск встановлення...';
+        setTimeout(() => {
+          if (window.AndroidBridge && window.AndroidBridge.installApk) {
+            window.AndroidBridge.installApk(pathOrError);
+          }
+        }, 1000);
+      } else {
+        fill.style.width = '0%';
+        text.innerText = `Помилка завантаження: ${pathOrError}`;
+        document.getElementById('num-error-actions').classList.remove('hidden');
+      }
+    };
+
+    window.onInstallStarted = function() {
+      // Hide update modal when installation page kicks off
+      document.getElementById('native-update-modal').classList.remove('open');
+    };
+
+    window.onInstallError = function(errorMsg) {
+      if (errorMsg === 'needs_permission') {
+        const text = document.getElementById('num-progress-text');
+        text.innerText = 'Необхідно надати дозвіл на встановлення додатків.';
+        
+        // Show button to open settings
+        const actions = document.getElementById('num-error-actions');
+        actions.innerHTML = `
+          <button class="settings-btn-primary" onclick="window.AndroidBridge.openInstallPermissionSettings()">Надати дозвіл</button>
+        `;
+        actions.classList.remove('hidden');
+      } else {
+        alert('Помилка встановлення: ' + errorMsg);
+      }
+    };
+
+    function cancelNativeUpdate() {
+      document.getElementById('native-update-modal').classList.remove('open');
+    }
+
+    function retryNativeUpdate() {
+      startApkDownloadFlow();
+    }
+
+    function showWebUpdateBanner(info) {
+      const banner = document.getElementById('update-banner');
+      banner.innerHTML = `
+        <div style="flex:1;">
+          <div style="font-size:12px; font-weight:800; color:var(--foreground);">Оновлення інтерфейсу (в. ${info.webVersion})</div>
+          <div style="font-size:10px; color:var(--muted-foreground); margin-top:2px;">${info.changelog || 'Поліпшення та виправлення інтерфейсу'}</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="update-btn-install" onclick="applyRemoteOta('${info.url}', '${info.webVersion}')">Оновити</button>
+          <button onclick="dismissUpdateBanner()" style="background:transparent; border:0; color:var(--muted-foreground); font-size:11px; font-weight:700; cursor:pointer; padding:6px 10px;">Пізніше</button>
+        </div>
+      `;
+      banner.style.display = 'flex';
+      setTimeout(() => banner.classList.add('show'), 100);
+    }
+
+    function dismissUpdateBanner() {
+      const banner = document.getElementById('update-banner');
+      banner.classList.remove('show');
+      setTimeout(() => banner.style.display = 'none', 400);
+    }
+
+    function applyRemoteOta(url, newVersion) {
+      if (window.AndroidBridge && window.AndroidBridge.updateWebAssets) {
+        localStorage.setItem('svitlo_web_pending_version', newVersion);
+        window.AndroidBridge.updateWebAssets(url);
+        dismissUpdateBanner();
+      }
+    }
+
+    // OTA UI Overlay controller
+    function toggleSettingsModal(show) {
+      const modal = document.getElementById('settings-modal');
+      if (show) {
+        modal.classList.add('open');
+        updateOtaStatusDisplay();
+      } else {
+        modal.classList.remove('open');
+      }
+    }
+
+    function updateOtaStatusDisplay() {
+      const statusLabel = document.getElementById('settings-ota-status');
+      if (window.AndroidBridge && window.AndroidBridge.getCustomWebPath) {
+        const path = window.AndroidBridge.getCustomWebPath();
+        if (path && path.length > 0) {
+          statusLabel.innerText = 'Оновлено користувачем (OTA)';
+          statusLabel.style.color = 'var(--color-s-yes)';
+        } else {
+          statusLabel.innerText = 'Встановлено заводську версію';
+          statusLabel.style.color = 'var(--muted-foreground)';
+        }
+      }
+    }
+
+    function installOtaUpdate() {
+      const urlInput = document.getElementById('settings-ota-url').value;
+      if (!urlInput || !urlInput.startsWith('http')) {
+        alert('Будь ласка, введіть коректну URL-адресу.');
+        return;
+      }
+      if (window.AndroidBridge && window.AndroidBridge.updateWebAssets) {
+        localStorage.setItem('svitlo_web_pending_version', '9.9.9-custom');
+        window.AndroidBridge.updateWebAssets(urlInput);
+        toggleSettingsModal(false);
+      } else {
+        alert('Ця функція доступна лише всередині Android-додатка.');
+      }
+    }
+
+    function resetOtaUpdate() {
+      if (window.AndroidBridge && window.AndroidBridge.clearWebAssets) {
+        localStorage.removeItem('svitlo_web_version');
+        window.AndroidBridge.clearWebAssets();
+        toggleSettingsModal(false);
+      } else {
+        alert('Ця функція доступна лише всередині Android-додатка.');
+      }
+    }
+
+    // Native Bridge Hooks
+    function checkBridge() {
+      if (window.AndroidBridge) {
+        document.getElementById('btn-test-notif').style.display = 'flex';
+        if (!AndroidBridge.isNotifPermissionGranted()) {
+          AndroidBridge.requestNotifPermission();
+        }
+      }
+    }
+
+    function triggerTestNotif() {
+      if (window.AndroidBridge) {
+        AndroidBridge.testNotification();
+      }
+    }
+
+    // Theme Switcher API
+    function initTheme() {
+      const savedTheme = localStorage.getItem('svitlo_theme_v5') || 'dark';
+      applyTheme(savedTheme);
+    }
+
+    function applyTheme(theme) {
+      const body = document.body;
+      const themeBtnIcon = document.getElementById('theme-btn-icon');
+      S.theme = theme;
+      
+      if (theme === 'light') {
+        body.classList.add('light-theme');
+        localStorage.setItem('svitlo_theme_v5', 'light');
+        themeBtnIcon.innerHTML = `
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        `;
+      } else {
+        body.classList.remove('light-theme');
+        localStorage.setItem('svitlo_theme_v5', 'dark');
+        themeBtnIcon.innerHTML = `
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        `;
+      }
+    }
+
+    function toggleTheme() {
+      applyTheme(S.theme === 'light' ? 'dark' : 'light');
+    }
+
+    // App Navigation Controllers
+    function goToScreen(screenName) {
+      document.getElementById('screen-landing').className = 'landing-screen hidden';
+      document.getElementById('screen-group-select').className = 'hidden';
+      document.getElementById('screen-dashboard').className = 'hidden';
+
+      if (screenName === 'landing') {
+        document.getElementById('screen-landing').className = 'landing-screen';
+        clearInterval(S.updateInterval);
+      } else if (screenName === 'group-select') {
+        document.getElementById('screen-group-select').className = '';
+      } else if (screenName === 'dashboard') {
+        document.getElementById('screen-dashboard').className = '';
+      }
+    }
+
+    // Fetch API Data and bootstrap
+    async function loadApiDataAndInitialize(forceShowLanding = false) {
+      const badge = document.getElementById('connection-status-badge');
+      if (badge) {
+        badge.innerText = 'Оновлення...';
+        badge.style.color = 'var(--color-s-maybe)';
+      }
+
+      let data = null;
+      let updateSource = '';
+
+      // 1. Try Live API Fetch
+      try {
+        const response = await fetch(API_URL, {
+          headers: { 'Accept': 'application/json' },
+          signal: AbortSignal.timeout(4000)
+        });
+        if (response.ok) {
+          const rawJson = await response.json();
+          data = JSON.parse(rawJson.body);
+          updateSource = 'online';
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+        }
+      } catch (err) {
+        console.warn('Live API load failed, checking cache...', err);
+      }
+
+      // 2. Try Cache Read
+      if (!data) {
+        try {
+          const cache = localStorage.getItem(CACHE_KEY);
+          if (cache) {
+            const { ts, data: cachedData } = JSON.parse(cache);
+            data = cachedData;
+            updateSource = 'cache';
+          }
+        } catch (e) {
+          console.error('Failed reading local storage cache', e);
+        }
+      }
+
+      // 3. Fallback mock schedules if completely offline with no cache
+      if (!data) {
+        data = generateMockApiData();
+        updateSource = 'mock';
+      }
+
+      S.apiData = data;
+      
+      // Update historical cache log for past days
+      saveScheduleToHistory(data);
+
+      // Rebuild dropdown panels dynamically based on API region list
+      buildDynamicDropdowns();
+
+      if (badge) {
+        if (updateSource === 'online') {
+          badge.innerText = 'Оновлено з мережі';
+          badge.style.color = 'var(--color-s-yes)';
+        } else if (updateSource === 'cache') {
+          badge.innerText = 'Офлайн (кеш)';
+          badge.style.color = 'var(--color-s-maybe)';
+        } else {
+          badge.innerText = 'Офлайн (шаблон)';
+          badge.style.color = 'var(--muted-foreground)';
+        }
+      }
+
+      if (forceShowLanding) {
+        goToScreen('landing');
+      } else if (S.currentRegionId && S.currentQueue) {
+        bootstrapDashboard();
+      } else {
+        goToScreen('landing');
+      }
+    }
+
+    // Dynamic dropdown list constructor
+    function buildDynamicDropdowns() {
+      buildDropdownList('landing-dropdown');
+      buildDropdownList('dash-dropdown');
+    }
+
+    function buildDropdownList(elementId, filterText = '') {
+      const panel = document.getElementById(elementId);
+      panel.innerHTML = '';
+      
+      const regionsList = S.apiData?.regions || [];
+      const filtered = regionsList.filter(r => {
+        const meta = REGION_META[r.cpu] || { name: r.name_ua };
+        return meta.name.toLowerCase().includes(filterText.toLowerCase());
+      });
+
+      if (filtered.length === 0) {
+        panel.innerHTML = '<div style="padding: 12px; font-size:12px; color:var(--muted-foreground); text-align:center;">Нічого не знайдено</div>';
+        return;
+      }
+
+      // Title
+      const title = document.createElement('div');
+      title.className = 'dropdown-title';
+      title.innerText = 'Оберіть регіон';
+      panel.appendChild(title);
+
+      filtered.forEach(region => {
+        const meta = REGION_META[region.cpu] || { name: region.name_ua, flag: '📍', provider: 'Обленерго' };
+        
+        const btn = document.createElement('button');
+        btn.className = 'region-item';
+        btn.onclick = () => selectRegion(region.cpu);
+
+        const isDtek = ['kyiv', 'kiivska-oblast', 'odeska-oblast', 'dnipropetrovska-oblast', 'dnipro-dnem'].includes(region.cpu);
+        const label = isDtek ? 'ДТЕК' : 'Черги';
+        const tagClass = isDtek ? 'tag-dtek' : 'tag-std';
+
+        btn.innerHTML = `
+          <div>
+            <div class="region-name">${meta.flag} ${meta.name}</div>
+            <div class="region-provider">${meta.provider}</div>
+          </div>
+          <span class="region-tag ${tagClass}">${label}</span>
+        `;
+        panel.appendChild(btn);
+      });
+    }
+
+    function toggleDropdown(show) {
+      const dropdown = document.getElementById('landing-dropdown');
+      if (show) dropdown.classList.add('open');
+      else setTimeout(() => dropdown.classList.remove('open'), 200);
+    }
+
+    function filterRegions(val) {
+      buildDropdownList('landing-dropdown', val);
+    }
+
+    // Dashboard dropdown filters
+    function toggleDropdownDash(show) {
+      const dropdown = document.getElementById('dash-dropdown');
+      if (show) dropdown.classList.add('open');
+      else setTimeout(() => dropdown.classList.remove('open'), 200);
+    }
+
+    function filterRegionsDash(val) {
+      buildDropdownList('dash-dropdown', val);
+    }
+
+    // Selection Handlers
+    function selectRegion(regionCpu) {
+      S.currentRegionId = regionCpu;
+      toggleDropdown(false);
+      toggleDropdownDash(false);
+      
+      const region = S.apiData.regions.find(r => r.cpu === regionCpu);
+      const meta = REGION_META[regionCpu] || { name: region.name_ua, provider: 'Обленерго' };
+      
+      document.getElementById('select-group-title').innerText = `Оберіть чергу для ${meta.name}`;
+      document.getElementById('select-group-provider').innerText = meta.provider;
+      
+      const container = document.getElementById('group-buttons-container');
+      container.innerHTML = '';
+      
+      const queues = getEffectiveQueues(regionCpu);
+      
+      queues.forEach(qKey => {
+        const btn = document.createElement('button');
+        btn.className = 'group-btn';
+        btn.onclick = () => selectQueue(qKey);
+        
+        let labelTitle = '';
+        let labelSubtitle = '';
+        
+        if (qKey.startsWith('G')) {
+          labelTitle = qKey.slice(1);
+          labelSubtitle = 'Група';
+        } else if (qKey.includes('.')) {
+          labelTitle = qKey;
+          labelSubtitle = 'Черга';
+        } else {
+          labelTitle = qKey;
+          labelSubtitle = 'Черга';
+        }
+        
+        btn.innerHTML = `
+          <span class="group-subtitle">${labelSubtitle}</span>
+          <span class="group-title">${labelTitle}</span>
+        `;
+        container.appendChild(btn);
+      });
+
+      goToScreen('group-select');
+    }
+
+    function selectRegionQuick(regionCpu) {
+      selectRegion(regionCpu);
+    }
+
+    function selectQueue(queueKey) {
+      S.currentQueue = queueKey;
+      
+      localStorage.setItem('svitlo_region_id_v5', S.currentRegionId);
+      localStorage.setItem('svitlo_queue_v5', queueKey);
+
+      bootstrapDashboard();
+    }
+
+    function refreshCurrentSchedule() {
+      loadApiDataAndInitialize();
+    }
+
+    // Start Dashboard calculations and timers
+    function bootstrapDashboard() {
+      renderDashboardControls();
+      renderStatusCard();
+      renderActiveTab();
+      
+      goToScreen('dashboard');
+
+      clearInterval(S.updateInterval);
+      S.updateInterval = setInterval(updateLiveTimer, 1000);
+      updateLiveTimer();
+    }
+
+    // Dynamic queue segment bar setup
+    function renderDashboardControls() {
+      const meta = REGION_META[S.currentRegionId] || { name: 'Регіон' };
+      
+      const badge = document.getElementById('dash-current-badge');
+      badge.innerText = `${meta.name} • ${qLabel(S.currentQueue)}`;
+
+      const bar = document.getElementById('queue-segment-bar');
+      bar.innerHTML = '';
+      
+      const queues = getEffectiveQueues(S.currentRegionId);
+      queues.forEach(qKey => {
+        const btn = document.createElement('button');
+        btn.className = `segment-item ${qKey === S.currentQueue ? 'active' : ''}`;
+        btn.onclick = () => selectQueue(qKey);
+        btn.innerText = qLabel(qKey);
+        bar.appendChild(btn);
+      });
+    }
+
+    function renderStatusCard() {
+      const meta = REGION_META[S.currentRegionId] || { name: 'Регіон', provider: 'Постачальник' };
+      document.getElementById('status-display-place').innerText = `${meta.name} • ${qLabelFull(S.currentQueue)}`;
+      document.getElementById('status-display-provider').innerText = meta.provider;
+    }
+
+    // Main Status and Countdown calculations
+    function updateLiveTimer() {
+      if (!S.apiData || !S.currentRegionId || !S.currentQueue) return;
+
+      const dateToday = S.apiData.date_today;
+      const slots = getSlots(S.currentRegionId, S.currentQueue, dateToday);
+
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+
+      if (!slots) return;
+
+      const tKey = `${String(h).padStart(2, '0')}:${m < 30 ? '00' : '30'}`;
+      const currentSlot = slots.find(item => item.time === tKey);
+      if (!currentSlot) return;
+
+      const currentStatus = currentSlot.status; // 1=On, 2=Off, 3=Maybe
+
+      const glow = document.getElementById('status-glow');
+      const pulse = document.getElementById('status-pulse');
+      const title = document.getElementById('status-title-text');
+      const desc = document.getElementById('status-desc-text');
+      const icon = document.getElementById('status-icon');
+
+      glow.className = 'glow-box';
+      pulse.className = 'status-pulse-dot';
+
+      if (currentStatus === 1) {
+        glow.classList.add('glow-yes');
+        pulse.classList.add('pulse-yes');
+        title.innerText = 'СВІТЛО Є';
+        desc.innerText = 'Подача електроенергії забезпечена згідно з графіком.';
+        icon.innerHTML = '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor"></polygon>';
+      } else if (currentStatus === 3) {
+        glow.classList.add('glow-maybe');
+        pulse.classList.add('pulse-maybe');
+        title.innerText = 'МОЖЛИВЕ ВІДКЛЮЧЕННЯ';
+        desc.innerText = 'Період можливого відключення (сіра зона графіка).';
+        icon.innerHTML = '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>';
+      } else {
+        glow.classList.add('glow-no');
+        pulse.classList.add('pulse-no');
+        title.innerText = 'НЕМАЄ СВІТЛА';
+        desc.innerText = 'Планове відключення світла згідно з опублікованим графіком.';
+        icon.innerHTML = '<path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>';
+      }
+
+      // Calculate time remaining until status changes
+      let nextStatus = null;
+      let slotsUntilChange = 0;
+      let foundChange = false;
+
+      const currentSlotIndex = slots.findIndex(item => item.time === tKey);
+      
+      for (let si = currentSlotIndex + 1; si < slots.length; si++) {
+        if (slots[si].status !== currentStatus) {
+          nextStatus = slots[si].status;
+          slotsUntilChange = si - currentSlotIndex;
+          foundChange = true;
+          break;
+        }
+      }
+
+      if (!foundChange) {
+        // Try looking at tomorrow's slots
+        const dateTomorrow = S.apiData.date_tomorrow;
+        const tomorrowSlots = getSlots(S.currentRegionId, S.currentQueue, dateTomorrow);
+        if (tomorrowSlots) {
+          for (let si = 0; si < tomorrowSlots.length; si++) {
+            if (tomorrowSlots[si].status !== currentStatus) {
+              nextStatus = tomorrowSlots[si].status;
+              slotsUntilChange = (slots.length - currentSlotIndex) + si;
+              foundChange = true;
+              break;
+            }
+          }
+        }
+      }
+
+      const timerVal = document.getElementById('timer-countdown');
+      const actionLabel = document.getElementById('timer-action-label');
+      const nextBadge = document.getElementById('timer-next-badge');
+      const progress = document.getElementById('timer-progress');
+
+      progress.className = 'progress-bar-fill';
+
+      if (foundChange && nextStatus) {
+        const totalMinutesRemaining = (slotsUntilChange * 30) - (m % 30);
+        const finalMin = totalMinutesRemaining % 60;
+        const finalHrs = Math.floor(totalMinutesRemaining / 60);
+        const finalSec = 59 - s;
+
+        const pad = (n) => String(n).padStart(2, '0');
+        timerVal.innerText = `${pad(finalHrs)}:${pad(finalMin)}:${pad(finalSec)}`;
+
+        if (currentStatus === 1) {
+          actionLabel.innerText = nextStatus === 3 ? 'до сірої зони' : 'до відключення';
+        } else if (currentStatus === 2) {
+          actionLabel.innerText = 'до увімкнення';
+        } else {
+          actionLabel.innerText = nextStatus === 1 ? 'до світла' : 'до відключення';
+        }
+
+        nextBadge.className = 'region-tag';
+        if (nextStatus === 1) {
+          nextBadge.innerText = 'Світло буде';
+          nextBadge.classList.add('tag-std');
+        } else if (nextStatus === 3) {
+          nextBadge.innerText = 'Сіра зона';
+          nextBadge.classList.add('tag-dtek');
+        } else {
+          nextBadge.innerText = 'Відключення';
+          nextBadge.classList.add('glow-no');
+        }
+
+        const totalBlockMin = 240;
+        const elapsed = totalBlockMin - totalMinutesRemaining;
+        const percent = Math.max(0, Math.min(100, (elapsed / totalBlockMin) * 100));
+        progress.style.width = `${percent}%`;
+        progress.classList.add(currentStatus === 1 ? 'fill-yes' : currentStatus === 3 ? 'fill-maybe' : 'fill-no');
+      } else {
+        timerVal.innerText = '—:—:—';
+        actionLabel.innerText = 'без змін';
+        nextBadge.className = 'region-tag glow-no';
+        nextBadge.innerText = '—';
+        progress.style.width = '0%';
+      }
+    }
+
+    // Toggle tabs
+    function switchMainTab(tab) {
+      S.activeTab = tab;
+      
+      document.getElementById('tab-btn-today').className = `tab-btn ${tab === 'today' ? 'active' : ''}`;
+      document.getElementById('tab-btn-tomorrow').className = `tab-btn ${tab === 'tomorrow' ? 'active' : ''}`;
+      document.getElementById('tab-btn-history').className = `tab-btn ${tab === 'history' ? 'active' : ''}`;
+
+      renderActiveTab();
+    }
+
+    function renderActiveTab() {
+      const tab = S.activeTab;
+      const timelineView = document.getElementById('view-timeline-tabs');
+      const historyView = document.getElementById('view-history-tab');
+
+      if (tab === 'history') {
+        timelineView.classList.add('hidden');
+        historyView.classList.remove('hidden');
+        renderHistory();
+      } else {
+        timelineView.classList.remove('hidden');
+        historyView.classList.add('hidden');
+        renderSingleDayTimeline(tab);
+      }
+    }
+
+    // Render horizontal timeline bar (24 hours) and vertical grouped summary list
+    function renderSingleDayTimeline(tab) {
+      const dateStr = tab === 'today' ? S.apiData.date_today : S.apiData.date_tomorrow;
+      const s48 = getSlots(S.currentRegionId, S.currentQueue, dateStr);
+      const isToday = tab === 'today';
+      const now = new Date();
+      const currentHour = now.getHours();
+
+      const matrixRow = document.getElementById('matrix-single-row-container');
+      matrixRow.innerHTML = '';
+
+      if (!s48) {
+        matrixRow.innerHTML = '<div style="padding:16px; font-size:12px; color:var(--muted-foreground); text-align:center;">Дані відсутні</div>';
+        document.getElementById('timeline-slots-list').innerHTML = '';
+        return;
+      }
+
+      const h24 = slots48to24(s48);
+      const dateParts = dateStr.split('-');
+      const formattedDate = `${dateParts[2]}.${dateParts[1]}`;
+      const dayName = UKRAINIAN_DAYS[new Date(dateStr).getDay()];
+
+      const flexrow = document.createElement('div');
+      flexrow.className = 'matrix-row';
+
+      const label = document.createElement('div');
+      label.className = 'matrix-day-label';
+      label.innerHTML = `
+        <span style="font-weight:900; display:block;">${dayName}</span>
+        <span style="font-size:8px; color:var(--muted-foreground); display:block;">${formattedDate}</span>
+      `;
+      flexrow.appendChild(label);
+
+      const cellsContainer = document.createElement('div');
+      cellsContainer.className = 'matrix-cells-container';
+
+      h24.forEach((val, hr) => {
+        const cell = document.createElement('div');
+        const statusClass = val === 1 ? 'yes' : val === 2 ? 'no' : 'maybe';
+        cell.className = `matrix-cell cell-${statusClass}`;
+        
+        if (isToday && hr === currentHour) {
+          cell.classList.add('cell-current');
+        }
+
+        const infoText = statusClass === 'yes' ? 'Світло є' : statusClass === 'no' ? 'Немає світла' : 'Можливе відключення';
+        cell.onmouseenter = (e) => showTooltip(e, `${String(hr).padStart(2, '0')}:00 – ${String((hr + 1) % 24).padStart(2, '0')}:00<br/>${infoText}`);
+        cell.onmouseleave = hideTooltip;
+
+        cellsContainer.appendChild(cell);
+      });
+
+      flexrow.appendChild(cellsContainer);
+      matrixRow.appendChild(flexrow);
+
+      // Render grouped vertical list slots
+      const slotsList = document.getElementById('timeline-slots-list');
+      slotsList.innerHTML = '';
+
+      let currentGroupStart = 0;
+      let currentGroupStatus = h24[0];
+
+      function addGroupedSlot(start, end, status) {
+        const card = document.createElement('div');
+        card.className = 'slot-card';
+        
+        const isCurrentSlot = isToday && (currentHour >= start && currentHour < end);
+        if (isCurrentSlot) {
+          card.style.borderColor = 'rgba(255,255,255,0.25)';
+          card.style.background = 'var(--card)';
+          card.style.boxShadow = '0 0 0 2.5px var(--foreground)';
+        }
+
+        const duration = end - start;
+        let badgeText = 'Є світло';
+        let badgeClass = 'tag-std';
+        let infoText = 'Електропостачання забезпечено згідно з графіком.';
+        
+        if (status === 2) {
+          badgeText = 'Немає';
+          badgeClass = 'glow-no';
+          infoText = 'Планове відключення електроенергії.';
+        } else if (status === 3) {
+          badgeText = 'Можливо';
+          badgeClass = 'tag-dtek';
+          infoText = 'Період можливого вимкнення світла.';
+        }
+
+        const formatHour = (h) => String(h).padStart(2, '0') + ':00';
+
+        card.innerHTML = `
+          <div>
+            <div style="display:flex; align-items:center;">
+              <span class="slot-time-range">${formatHour(start)} – ${formatHour(end % 24)}</span>
+              <span class="slot-duration">(${duration} год)</span>
+            </div>
+            <div class="slot-info" style="margin-top:2px;">${infoText}</div>
+          </div>
+          <span class="slot-badge ${badgeClass}">${badgeText}</span>
+        `;
+        slotsList.appendChild(card);
+      }
+
+      for (let hr = 1; hr < 24; hr++) {
+        if (h24[hr] !== currentGroupStatus) {
+          addGroupedSlot(currentGroupStart, hr, currentGroupStatus);
+          currentGroupStart = hr;
+          currentGroupStatus = h24[hr];
+        }
+      }
+      addGroupedSlot(currentGroupStart, 24, currentGroupStatus);
+    }
+
+    // Render historical accordion list
+    function renderHistory() {
+      const historyList = document.getElementById('history-days-list');
+      historyList.innerHTML = '';
+
+      const today = new Date();
+      const days = [-1, -2, -3];
+
+      days.forEach(dayOffset => {
+        const currentDate = new Date(today);
+        currentDate.setDate(today.getDate() + dayOffset);
+        
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const dayVal = currentDate.getDate();
+        const dateStr = `${year}-${month}-${String(dayVal).padStart(2, '0')}`;
+        
+        const formattedDate = `${String(dayVal).padStart(2, '0')}.${month}`;
+        const dayOfWeek = UKRAINIAN_DAYS[currentDate.getDay()];
+
+        const cachedDay = readHistoryFromCache(dateStr);
+        let h24 = [];
+        
+        if (cachedDay) {
+          h24 = cachedDay;
+        } else {
+          h24 = generateMockDayHistory(S.currentRegionId, S.currentQueue, dateStr);
+        }
+
+        const card = document.createElement('div');
+        card.className = 'history-card';
+        card.onclick = (e) => {
+          if (e.target.classList.contains('matrix-cell')) return;
+          card.classList.toggle('expanded');
+        };
+
+        let lightHours = 0;
+        let outageHours = 0;
+        h24.forEach(v => {
+          if (v === 1) lightHours++;
+          if (v === 2) outageHours++;
+        });
+
+        let cellsHtml = '';
+        h24.forEach(val => {
+          const statusClass = val === 1 ? 'yes' : val === 2 ? 'no' : 'maybe';
+          cellsHtml += `<div class="matrix-cell cell-${statusClass}"></div>`;
+        });
+
+        let slotsHtml = '';
+        let currentGroupStart = 0;
+        let currentGroupStatus = h24[0];
+
+        function addHistorySlot(start, end, status) {
+          const duration = end - start;
+          let badgeText = 'Є світло';
+          let badgeClass = 'tag-std';
+          if (status === 2) {
+            badgeText = 'Немає';
+            badgeClass = 'glow-no';
+          } else if (status === 3) {
+            badgeText = 'Можливо';
+            badgeClass = 'tag-dtek';
+          }
+          const formatHour = (h) => String(h).padStart(2, '0') + ':00';
+          
+          slotsHtml += `
+            <div class="slot-card" style="padding: 8px 12px; margin-bottom: 4px;">
+              <div>
+                <span class="slot-time-range" style="font-size:11.5px;">${formatHour(start)} – ${formatHour(end % 24)}</span>
+                <span style="font-size:10px; color:var(--muted-foreground); margin-left:6px;">(${duration} год)</span>
+              </div>
+              <span class="slot-badge ${badgeClass}" style="font-size:8px; padding:1px 4px;">${badgeText}</span>
+            </div>
+          `;
+        }
+
+        for (let hr = 1; hr < 24; hr++) {
+          if (h24[hr] !== currentGroupStatus) {
+            addHistorySlot(currentGroupStart, hr, currentGroupStatus);
+            currentGroupStart = hr;
+            currentGroupStatus = h24[hr];
+          }
+        }
+        addHistorySlot(currentGroupStart, 24, currentGroupStatus);
+
+        card.innerHTML = `
+          <div class="history-card-header">
+            <div>
+              <span class="history-day-title">${dayOfWeek}</span>
+              <span style="font-size:10px; color:var(--muted-foreground); margin-left:6px;">${formattedDate}</span>
+            </div>
+            <span style="font-size:10px; color:var(--muted-foreground); font-weight:600;">
+              Світло: ${lightHours} год • Без: ${outageHours} год
+            </span>
+          </div>
+          
+          <div class="matrix-cells-container" style="width:100%; margin-top:8px; gap:1.5px;">
+            ${cellsHtml}
+          </div>
+
+          <div class="history-card-details">
+            <div class="timeline-slots-title" style="margin-top:4px; margin-bottom:6px; font-size:9.5px;">Повний розклад дня</div>
+            <div class="slots-container">
+              ${slotsHtml}
+            </div>
+          </div>
+        `;
+        historyList.appendChild(card);
+      });
+    }
+
+    // Utilities
+    function sortByDotNum(arr) {
+      return [...arr].sort((a, b) => {
+        const pa = String(a).split('.');
+        const pb = String(b).split('.');
+        const am = parseInt(pa[0], 10) || 0;
+        const as = parseInt(pa[1], 10) || 0;
+        const bm = parseInt(pb[0], 10) || 0;
+        const bs = parseInt(pb[1], 10) || 0;
+        return am !== bm ? am - bm : as - bs;
+      });
+    }
+
+    function getEffectiveQueues(cpu) {
+      const reg = S.apiData?.regions?.find(r => r.cpu === cpu);
+      if (!reg) return [];
+      const raw = Object.keys(reg.schedule || {});
+      
+      const hasManySubgroups = raw.some(q => {
+        const parts = String(q).split('.');
+        const num = parseInt(parts[0], 10);
+        return num > 6;
+      });
+      
+      if (hasManySubgroups) {
+        return ['G1', 'G2', 'G3', 'G4', 'G5', 'G6'];
+      }
+      
+      return sortByDotNum(raw);
+    }
+
+    function groupMembers(rawQueues, groupKey) {
+      if (groupKey.startsWith('G')) {
+        const g = parseInt(groupKey.slice(1), 10);
+        const lo = (g - 1) * 10 + 1;
+        const hi = g * 10;
+        return rawQueues.filter(q => {
+          const parts = String(q).split('.');
+          const num = parseInt(parts[0], 10);
+          return num >= lo && num <= hi;
+        });
+      }
+      return rawQueues.filter(q => String(q).split('.')[0] === groupKey);
+    }
+
+    function getSlots(cpu, queue, dateStr) {
+      const reg = S.apiData?.regions?.find(r => r.cpu === cpu);
+      if (!reg) return null;
+      const rawQueues = Object.keys(reg.schedule || {});
+      
+      if (rawQueues.includes(queue)) {
+        const qSched = reg.schedule[queue];
+        if (!qSched) return null;
+        const day = qSched[dateStr];
+        if (!day) return null;
+        return Object.entries(day).map(([t, v]) => ({ time: t, status: v }));
+      }
+      
+      const subs = groupMembers(rawQueues, queue);
+      if (!subs.length) return null;
+      const merged = {};
+      
+      subs.forEach(sq => {
+        const day = reg.schedule[sq]?.[dateStr];
+        if (!day) return;
+        Object.entries(day).forEach(([t, v]) => {
+          if (!(t in merged)) {
+            merged[t] = v;
+          } else {
+            const current = merged[t];
+            if (v === 2 || current === 2) {
+              merged[t] = 2;
+            } else if (v === 3 || current === 3) {
+              merged[t] = 3;
+            } else {
+              merged[t] = 1;
+            }
+          }
+        });
+      });
+      
+      const entries = Object.entries(merged).sort(([a], [b]) => a.localeCompare(b));
+      return entries.length ? entries.map(([t, v]) => ({ time: t, status: v })) : null;
+    }
+
+    function slots48to24(s48) {
+      if (!s48) return null;
+      const h = [];
+      for (let i = 0; i < 24; i++) {
+        const t1 = `${String(i).padStart(2, '0')}:00`;
+        const t2 = `${String(i).padStart(2, '0')}:30`;
+        const s1 = s48.find(s => s.time === t1)?.status ?? 1;
+        const s2 = s48.find(s => s.time === t2)?.status ?? 1;
+        
+        let v = 1;
+        if (s1 === 2 || s2 === 2) v = 2;
+        else if (s1 === 3 || s2 === 3) v = 3;
+        h.push(v);
+      }
+      return h;
+    }
+
+    function qLabel(q) {
+      if (q.startsWith('G')) return 'Гр. ' + q.slice(1);
+      return q;
+    }
+
+    function qLabelFull(q) {
+      if (q.startsWith('G')) return 'Група ' + q.slice(1);
+      if (/^\d+$/.test(q)) return 'Черга ' + q;
+      return 'Підгрупа ' + q;
+    }
+
+    // Historical cache log
+    function saveScheduleToHistory(apiData) {
+      if (!apiData || !apiData.regions) return;
+      try {
+        const dateToday = apiData.date_today;
+        const dateTomorrow = apiData.date_tomorrow;
+        
+        apiData.regions.forEach(region => {
+          const queues = getEffectiveQueues(region.cpu);
+          queues.forEach(qKey => {
+            const todayS48 = getSlots(region.cpu, qKey, dateToday);
+            if (todayS48) {
+              const todayH24 = slots48to24(todayS48);
+              localStorage.setItem(`svitlo_history_${region.cpu}_${qKey}_${dateToday}`, JSON.stringify(todayH24));
+            }
+            const tomorrowS48 = getSlots(region.cpu, qKey, dateTomorrow);
+            if (tomorrowS48) {
+              const tomorrowH24 = slots48to24(tomorrowS48);
+              localStorage.setItem(`svitlo_history_${region.cpu}_${qKey}_${dateTomorrow}`, JSON.stringify(tomorrowH24));
+            }
+          });
+        });
+      } catch (e) {
+        console.error('Failed saving history', e);
+      }
+    }
+
+    // Read history cache helper
+    function readHistoryFromCache(dateStr) {
+      try {
+        const cacheVal = localStorage.getItem(`svitlo_history_${S.currentRegionId}_${S.currentQueue}_${dateStr}`);
+        return cacheVal ? JSON.parse(cacheVal) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Fallbacks
+    function generateMockApiData() {
+      const today = new Date();
+      const dateToday = today.toISOString().split('T')[0];
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      const dateTomorrow = tomorrow.toISOString().split('T')[0];
+
+      const regions = Object.keys(REGION_META).map(cpu => {
+        const schedule = {};
+        const subgroups = cpu === 'kyiv' 
+          ? Array.from({ length: 60 }, (_, i) => `${i + 1}.1`) 
+          : ['1.1', '1.2', '2.1', '2.2', '3.1', '3.2', '4.1', '4.2', '5.1', '5.2', '6.1', '6.2'];
+
+        subgroups.forEach(sq => {
+          schedule[sq] = {};
+          [dateToday, dateTomorrow].forEach(d => {
+            schedule[sq][d] = {};
+            const seed = (parseInt(sq.split('.')[0]) * 3 + new Date(d).getDate()) % 8;
+            for (let i = 0; i < 48; i++) {
+              const hour = Math.floor(i / 2);
+              const timeStr = `${String(hour).padStart(2, '0')}:${i % 2 === 0 ? '00' : '30'}`;
+              
+              let val = 1;
+              const slotPattern = (hour + seed) % 6;
+              if (slotPattern === 0 || slotPattern === 1) val = 2; // Off
+              else if (slotPattern === 2) val = 3; // Maybe
+              
+              schedule[sq][d][timeStr] = val;
+            }
+          });
+        });
+        return { cpu, name_ua: REGION_META[cpu].name, schedule, emergency: false };
+      });
+
+      return { date_today: dateToday, date_tomorrow: dateTomorrow, regions };
+    }
+
+    function generateMockDayHistory(cpu, queue, dateStr) {
+      const h24 = [];
+      const seed = (parseInt(queue.replace(/\D+/g, '') || '1') * 2 + new Date(dateStr).getDate()) % 6;
+      for (let i = 0; i < 24; i++) {
+        let val = 1;
+        const pattern = (i + seed) % 8;
+        if (pattern === 0 || pattern === 1) val = 2; // Off
+        else if (pattern === 2) val = 3; // Maybe
+        h24.push(val);
+      }
+      return h24;
+    }
+
+    // Tooltip
+    function showTooltip(e, text) {
+      const tt = document.getElementById('tooltip');
+      tt.innerHTML = text;
+      tt.style.display = 'block';
+
+      const rect = e.target.getBoundingClientRect();
+      tt.style.left = `${rect.left + window.scrollX + rect.width / 2 - 90}px`;
+      tt.style.top = `${rect.top + window.scrollY - 70}px`;
+    }
+
+    function hideTooltip() {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
