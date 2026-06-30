@@ -826,6 +826,151 @@
     .hidden {
       display: none !important;
     }
+
+    /* Premium Intro Screen */
+    .intro-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #09090b;
+      color: #fafafa;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .intro-screen.fade-out {
+      opacity: 0;
+      transform: scale(0.95);
+      pointer-events: none;
+    }
+    
+    /* Vienna-to-Kyiv Map Route */
+    .route-map {
+      width: 100%;
+      height: 120px;
+      position: relative;
+      margin: 20px 0;
+      overflow: visible;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .route-map.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .map-dot {
+      fill: var(--muted-foreground);
+      transition: fill 0.3s;
+    }
+    .map-dot.active {
+      fill: #fbbf24;
+      filter: drop-shadow(0 0 6px #fbbf24);
+    }
+    .route-path {
+      stroke: var(--border);
+      stroke-dasharray: 4,4;
+      fill: none;
+    }
+    .route-path-glow {
+      stroke: #3b82f6;
+      stroke-linecap: round;
+      fill: none;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+    }
+    .car-marker {
+      position: absolute;
+      font-size: 20px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -12px;
+      margin-top: -12px;
+      pointer-events: none;
+      transform: translate(-100px, -100px);
+    }
+    
+    /* Guide Tour Spotlight & Tooltip Overlay */
+    .tour-spotlight-active {
+      z-index: 10001 !important;
+      position: relative !important;
+      pointer-events: none !important;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75), 0 0 15px rgba(255, 255, 255, 0.4) !important;
+      border-radius: 12px !important;
+      transition: all 0.3s ease !important;
+    }
+    .tour-tooltip {
+      position: fixed;
+      z-index: 10002;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      width: 280px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: none;
+    }
+    .tour-tooltip-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--foreground);
+      margin-bottom: 6px;
+    }
+    .tour-tooltip-desc {
+      font-size: 12px;
+      color: var(--muted-foreground);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .tour-tooltip-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tour-tooltip-progress {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted-foreground);
+    }
+    .tour-tooltip-btn {
+      background: var(--foreground);
+      color: var(--background);
+      border: 0;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .tour-tooltip::after {
+      content: '';
+      position: absolute;
+      border-width: 8px;
+      border-style: solid;
+      border-color: transparent;
+      display: block;
+    }
+    .tour-tooltip.arrow-bottom::after {
+      border-top-color: var(--card);
+      bottom: -16px;
+      left: calc(50% - 8px);
+    }
+    .tour-tooltip.arrow-top::after {
+      border-bottom-color: var(--card);
+      top: -16px;
+      left: calc(50% - 8px);
+    }
   </style>
 </head>
 <body>
@@ -835,6 +980,48 @@
 
   <!-- Auto OTA Update Alert Banner -->
   <div id="update-banner" class="update-banner"></div>
+
+  <!-- Premium Guided Tour Card -->
+  <div id="tour-tooltip" class="tour-tooltip">
+    <div class="tour-tooltip-title" id="tour-title">Підказка</div>
+    <div class="tour-tooltip-desc" id="tour-desc">Опис елементу...</div>
+    <div class="tour-tooltip-footer">
+      <span class="tour-tooltip-progress" id="tour-progress">1 / 4</span>
+      <button class="tour-tooltip-btn" id="tour-next-btn" onclick="nextTourStep()">Далі</button>
+    </div>
+  </div>
+
+  <!-- Premium Intro Screen -->
+  <div id="screen-intro" class="intro-screen">
+    <canvas id="intro-globe" width="220" height="220" style="width: 220px; height: 220px; cursor: grab;"></canvas>
+    
+    <!-- Vienna-to-Kyiv Map Animation -->
+    <div id="intro-route" class="route-map">
+      <svg width="100%" height="100%" viewBox="0 0 320 120" style="overflow: visible;">
+        <!-- Vienna Dot -->
+        <circle id="map-dot-vienna" cx="60" cy="60" r="6" class="map-dot active" />
+        <text x="60" y="80" fill="var(--muted-foreground)" font-size="10" font-weight="800" text-anchor="middle">Відень</text>
+        
+        <!-- Kyiv Dot -->
+        <circle id="map-dot-kyiv" cx="260" cy="60" r="6" class="map-dot" />
+        <text x="260" y="80" fill="var(--muted-foreground)" font-size="10" font-weight="800" text-anchor="middle">Київ</text>
+        
+        <!-- Arc route path -->
+        <path id="route-arc" d="M 60,60 Q 160,10 260,60" class="route-path" />
+        <path id="route-arc-glow" d="M 60,60 Q 160,10 260,60" class="route-path-glow" stroke-width="2.5" />
+      </svg>
+      <div id="car-marker" class="car-marker">🚗</div>
+    </div>
+
+    <!-- Subtitle text with typewriter effect -->
+    <div id="intro-text" style="font-size: 13.5px; font-weight: 600; text-align: center; max-width: 285px; min-height: 48px; line-height: 1.5; color: var(--muted-foreground); margin-bottom: 24px;"></div>
+    
+    <!-- Actions buttons -->
+    <div id="intro-actions" style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 280px; opacity: 0; transform: translateY(15px); transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <button class="settings-btn-primary" onclick="startIntroTour()" style="margin: 0; width: 100%;">Продовжити з гайдом</button>
+      <button class="settings-btn-secondary" onclick="skipIntroTour()" style="margin: 0; width: 100%; border: 0; color: var(--muted-foreground);">Дослідити самостійно</button>
+    </div>
+  </div>
 
   <!-- Native Update Progress Modal -->
   <div id="native-update-modal" class="modal-overlay">
@@ -1006,11 +1193,10 @@
       <!-- Segmented Control for Queues/Groups -->
       <div id="queue-segment-bar" class="dashboard-segment"></div>
 
-      <!-- Main Segment Selector: Сьогодні / Завтра / Історія -->
+      <!-- Main Segment Selector: Сьогодні / Завтра -->
       <div class="main-tab-bar">
         <button id="tab-btn-today" class="tab-btn active" onclick="switchMainTab('today')">Сьогодні</button>
-        <button id="tab-btn-tomorrow" class="tab-btn" onclick="switchMainTab('tomorrow')">Завтра</button>
-        <button id="tab-btn-history" class="tab-btn" onclick="switchMainTab('history')">Історія (3 дні)</button>
+        <button id="tab-btn-tomorrow" class="tab-btn" onclick="switchMainTab('tomorrow')" style="display: none;">Завтра</button>
       </div>
 
       <!-- Today / Tomorrow Content View -->
@@ -1038,10 +1224,7 @@
         <div id="timeline-slots-list" class="slots-container"></div>
       </div>
 
-      <!-- History (3 past days) Content View -->
-      <div id="view-history-tab" class="hidden">
-        <div id="history-days-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
-      </div>
+
 
     </div>
 
@@ -1097,6 +1280,342 @@
       pendingApkUrl: ''
     };
 
+
+    // ══════════════════════════════════════════════════════
+    // PREMIUM ONBOARDING & TOUR GUIDE
+    // ══════════════════════════════════════════════════════
+    
+    // Globals for 3D Globe
+    let globeRotationY = 0;
+    let globeRotationX = 0.3;
+    let globePoints = [];
+    const globeRadius = 80;
+    let isDraggingGlobe = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+    
+    // Onboarding guide steps config
+    let tourCurrentStep = 0;
+    const tourSteps = [
+      {
+        elementId: 'app-container', // Whole screen landing info
+        title: 'Ласкаво просимо!',
+        desc: 'Світло UA допоможе вам відстежувати графіки відключення електроенергії у реальному часі.',
+        arrow: 'none',
+        position: 'center'
+      },
+      {
+        elementId: 'landing-search', // Search input
+        title: 'Швидкий пошук',
+        desc: 'Почніть вводити назву своєї області тут, щоб миттєво знайти відповідний графік.',
+        arrow: 'top',
+        position: 'below'
+      },
+      {
+        elementId: 'btn-test-notif', // Test notifications
+        title: 'Тест сповіщень',
+        desc: 'Натисніть на дзвоник для перевірки миттєвих повідомлень про стан світла.',
+        arrow: 'top',
+        position: 'below'
+      },
+      {
+        elementId: 'theme-btn-icon', // Theme switch
+        title: 'Зміна теми',
+        desc: 'Швидко перемикайтеся між світлою та темною темами для вашого комфорту.',
+        arrow: 'top',
+        position: 'below'
+      }
+    ];
+
+    function initGlobePoints() {
+      // Create a gorgeous particle globe
+      globePoints = [];
+      const count = 280;
+      for (let i = 0; i < count; i++) {
+        const phi = Math.acos(-1 + (2 * i) / count);
+        const theta = Math.sqrt(count * Math.PI) * phi;
+        const x = globeRadius * Math.sin(phi) * Math.cos(theta);
+        const y = globeRadius * Math.sin(phi) * Math.sin(theta);
+        const z = globeRadius * Math.cos(phi);
+        
+        // Add random blue/yellow glow tint for Ukraine colors
+        const color = Math.random() > 0.5 ? 'rgba(59, 130, 246, ' : 'rgba(251, 191, 36, ';
+        globePoints.push({ x, y, z, color });
+      }
+    }
+
+    function drawGlobe() {
+      const canvas = document.getElementById('intro-globe');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const focus = 200;
+
+      // Project and sort points by Z to render correctly
+      const projected = globePoints.map(p => {
+        // Rotate Y
+        const cosY = Math.cos(globeRotationY);
+        const sinY = Math.sin(globeRotationY);
+        let x1 = p.x * cosY - p.z * sinY;
+        let z1 = p.x * sinY + p.z * cosY;
+
+        // Rotate X
+        const cosX = Math.cos(globeRotationX);
+        const sinX = Math.sin(globeRotationX);
+        let y2 = p.y * cosX - z1 * sinX;
+        let z2 = p.y * sinX + z1 * cosX;
+
+        const scale = focus / (focus + z2);
+        const projX = cx + x1 * scale;
+        const projY = cy + y2 * scale;
+        
+        return { x: projX, y: projY, z: z2, color: p.color };
+      });
+
+      // Sort points so back dots are drawn first
+      projected.sort((a, b) => b.z - a.z);
+
+      // Draw dots
+      projected.forEach(p => {
+        // Opacity dependent on depth (Z)
+        const opacity = Math.max(0.1, Math.min(1.0, 1 - (p.z + globeRadius) / (2 * globeRadius)));
+        ctx.beginPath();
+        // front dots are larger, back dots are smaller
+        const size = Math.max(1, Math.min(4.5, 2.5 * (1.5 - (p.z / globeRadius))));
+        ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color + opacity.toFixed(2) + ')';
+        ctx.fill();
+      });
+
+      // Auto rotation when not dragging
+      if (!isDraggingGlobe) {
+        globeRotationY += 0.007;
+      }
+      
+      requestAnimationFrame(drawGlobe);
+    }
+
+    function setupGlobeInteractions() {
+      const canvas = document.getElementById('intro-globe');
+      if (!canvas) return;
+      
+      const onStart = (e) => {
+        isDraggingGlobe = true;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        lastMouseX = clientX;
+        lastMouseY = clientY;
+      };
+      
+      const onMove = (e) => {
+        if (!isDraggingGlobe) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const deltaX = clientX - lastMouseX;
+        const deltaY = clientY - lastMouseY;
+        
+        globeRotationY += deltaX * 0.01;
+        globeRotationX += deltaY * 0.01;
+        
+        lastMouseX = clientX;
+        lastMouseY = clientY;
+      };
+      
+      const onEnd = () => { isDraggingGlobe = false; };
+
+      canvas.addEventListener('mousedown', onStart);
+      canvas.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onEnd);
+      
+      canvas.addEventListener('touchstart', onStart);
+      canvas.addEventListener('touchmove', onMove);
+      window.addEventListener('touchend', onEnd);
+    }
+
+    // Typewriter effect
+    function typeText(targetId, text, speed = 40, callback = null) {
+      const el = document.getElementById(targetId);
+      if (!el) return;
+      el.innerHTML = '';
+      let i = 0;
+      function step() {
+        if (i < text.length) {
+          el.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(step, speed);
+        } else if (callback) {
+          callback();
+        }
+      }
+      step();
+    }
+
+    // Launch Onboarding Intro sequence
+    function startOnboardingFlow() {
+      const introScreen = document.getElementById('screen-intro');
+      
+      // Check if user is already onboarded
+      if (localStorage.getItem('svitlo_onboarded_v5')) {
+        introScreen.style.display = 'none';
+        return;
+      }
+      
+      initGlobePoints();
+      drawGlobe();
+      setupGlobeInteractions();
+
+      // Sequence:
+      // 1. Globe rotates, typewriter intro text starts
+      typeText('intro-text', 'Цей додаток було з любов'ю розроблено у Відні...', 45, () => {
+        setTimeout(() => {
+          // 2. Fade globe out, fade route map in
+          const globe = document.getElementById('intro-globe');
+          if (globe) globe.style.display = 'none';
+          
+          const route = document.getElementById('intro-route');
+          if (route) route.classList.add('show');
+          
+          typeText('intro-text', 'Звідки ми вирушаємо напряму до Києва, в Україну! 🇺🇦', 40, () => {
+            // Start route animation
+            startRouteAnimation();
+          });
+        }, 1200);
+      });
+    }
+
+    function startRouteAnimation() {
+      const arc = document.getElementById('route-arc');
+      const arcGlow = document.getElementById('route-arc-glow');
+      const car = document.getElementById('car-marker');
+      if (!arc || !car || !arcGlow) return;
+
+      const pathLength = arc.getTotalLength();
+      arcGlow.style.strokeDasharray = pathLength;
+      arcGlow.style.strokeDashoffset = pathLength;
+      
+      let start = null;
+      const duration = 2200; // 2.2 seconds route time
+
+      function step(timestamp) {
+        if (!start) start = timestamp;
+        const progress = Math.min((timestamp - start) / duration, 1.0);
+        
+        // Update path dashoffset to draw line
+        arcGlow.style.strokeDashoffset = pathLength - (progress * pathLength);
+        
+        // Get coordinates along the arc path for the car
+        const point = arc.getPointAtLength(progress * pathLength);
+        car.style.transform = `translate(${point.x}px, ${point.y}px)`;
+        
+        if (progress < 1.0) {
+          requestAnimationFrame(step);
+        } else {
+          // Glow Kyiv dot
+          document.getElementById('map-dot-kyiv').classList.add('active');
+          setTimeout(() => {
+            // 3. Show action buttons
+            const actions = document.getElementById('intro-actions');
+            actions.style.opacity = '1';
+            actions.style.transform = 'translateY(0)';
+          }, 400);
+        }
+      }
+      
+      requestAnimationFrame(step);
+    }
+
+    function skipIntroTour() {
+      localStorage.setItem('svitlo_onboarded_v5', 'true');
+      const intro = document.getElementById('screen-intro');
+      intro.classList.add('fade-out');
+      setTimeout(() => intro.style.display = 'none', 800);
+    }
+
+    function startIntroTour() {
+      // Hide intro screen, initialize step-by-step UI helper
+      const intro = document.getElementById('screen-intro');
+      intro.classList.add('fade-out');
+      setTimeout(() => {
+        intro.style.display = 'none';
+        tourCurrentStep = 0;
+        showTourStep();
+      }, 800);
+    }
+
+    function showTourStep() {
+      const step = tourSteps[tourCurrentStep];
+      const target = document.getElementById(step.elementId);
+      
+      // Skip step if target is hidden or not visible
+      if (step.elementId !== 'app-container' && (!target || target.offsetWidth === 0 || window.getComputedStyle(target).display === 'none')) {
+        if (tourCurrentStep < tourSteps.length - 1) {
+          tourCurrentStep++;
+          showTourStep();
+        } else {
+          nextTourStep(); // Finish
+        }
+        return;
+      }
+      
+      const tooltip = document.getElementById('tour-tooltip');
+      if (!target || !tooltip) return;
+
+      // Remove spotlight from any previous elements
+      document.querySelectorAll('.tour-spotlight-active').forEach(el => {
+        el.classList.remove('tour-spotlight-active');
+      });
+
+      // Add spotlight overlay class to target element (unless center-screen introduction step 0)
+      if (step.elementId !== 'app-container') {
+        target.classList.add('tour-spotlight-active');
+      }
+
+      // Populate tooltip contents
+      document.getElementById('tour-title').innerText = step.title;
+      document.getElementById('tour-desc').innerText = step.desc;
+      document.getElementById('tour-progress').innerText = `${tourCurrentStep + 1} / ${tourSteps.length}`;
+      
+      const nextBtn = document.getElementById('tour-next-btn');
+      nextBtn.innerText = (tourCurrentStep === tourSteps.length - 1) ? 'Завершити' : 'Далі';
+
+      // Position the tooltip
+      tooltip.style.display = 'block';
+      tooltip.className = 'tour-tooltip'; // Reset classes
+
+      const rect = target.getBoundingClientRect();
+      
+      if (step.position === 'center') {
+        tooltip.style.top = '50%';
+        tooltip.style.left = '50%';
+        tooltip.style.transform = 'translate(-50%, -50%)';
+        tooltip.classList.add('arrow-none');
+      } else {
+        // Position below targeted element
+        tooltip.style.left = `${rect.left + window.scrollX + rect.width / 2 - 140}px`;
+        tooltip.style.top = `${rect.bottom + window.scrollY + 12}px`;
+        tooltip.style.transform = 'none';
+        tooltip.classList.add('arrow-top');
+      }
+    }
+
+    function nextTourStep() {
+      if (tourCurrentStep < tourSteps.length - 1) {
+        tourCurrentStep++;
+        showTourStep();
+      } else {
+        // Tour completed
+        document.querySelectorAll('.tour-spotlight-active').forEach(el => {
+          el.classList.remove('tour-spotlight-active');
+        });
+        document.getElementById('tour-tooltip').style.display = 'none';
+        localStorage.setItem('svitlo_onboarded_v5', 'true');
+      }
+    }
+
     window.onload = function() {
 
 
@@ -1114,6 +1633,9 @@
       } else {
         loadApiDataAndInitialize(true); // first load
       }
+
+      // Start Onboarding animation intro
+      startOnboardingFlow();
 
       // Check for available OTA updates from GitHub on boot
       setTimeout(checkForOtaUpdates, 3000);
@@ -1386,8 +1908,6 @@
 
       S.apiData = data;
       
-      // Update historical cache log for past days
-      saveScheduleToHistory(data);
 
       // Rebuild dropdown panels dynamically based on API region list
       buildDynamicDropdowns();
@@ -1562,6 +2082,22 @@
     function bootstrapDashboard() {
       renderDashboardControls();
       renderStatusCard();
+      
+      // Check if tomorrow's data exists for current region/queue to show/hide Tomorrow button
+      const dateTomorrow = S.apiData?.date_tomorrow;
+      const tomorrowSlots = dateTomorrow ? getSlots(S.currentRegionId, S.currentQueue, dateTomorrow) : null;
+      const tomorrowBtn = document.getElementById('tab-btn-tomorrow');
+      if (tomorrowBtn) {
+        if (tomorrowSlots && tomorrowSlots.length > 0) {
+          tomorrowBtn.style.display = 'inline-block';
+        } else {
+          tomorrowBtn.style.display = 'none';
+          if (S.activeTab === 'tomorrow') {
+            S.activeTab = 'today';
+          }
+        }
+      }
+      
       renderActiveTab();
       
       goToScreen('dashboard');
@@ -1733,8 +2269,11 @@
       S.activeTab = tab;
       
       document.getElementById('tab-btn-today').className = `tab-btn ${tab === 'today' ? 'active' : ''}`;
-      document.getElementById('tab-btn-tomorrow').className = `tab-btn ${tab === 'tomorrow' ? 'active' : ''}`;
-      document.getElementById('tab-btn-history').className = `tab-btn ${tab === 'history' ? 'active' : ''}`;
+      
+      const tomorrowBtn = document.getElementById('tab-btn-tomorrow');
+      if (tomorrowBtn) {
+        tomorrowBtn.className = `tab-btn ${tab === 'tomorrow' ? 'active' : ''}`;
+      }
 
       renderActiveTab();
     }
@@ -1742,17 +2281,10 @@
     function renderActiveTab() {
       const tab = S.activeTab;
       const timelineView = document.getElementById('view-timeline-tabs');
-      const historyView = document.getElementById('view-history-tab');
-
-      if (tab === 'history') {
-        timelineView.classList.add('hidden');
-        historyView.classList.remove('hidden');
-        renderHistory();
-      } else {
+      if (timelineView) {
         timelineView.classList.remove('hidden');
-        historyView.classList.add('hidden');
-        renderSingleDayTimeline(tab);
       }
+      renderSingleDayTimeline(tab);
     }
 
     // Render horizontal timeline bar (24 hours) and vertical grouped summary list
@@ -1868,90 +2400,7 @@
       addGroupedSlot(currentGroupStart, 24, currentGroupStatus);
     }
 
-    // Render historical accordion list
-    function renderHistory() {
-      const historyList = document.getElementById('history-days-list');
-      historyList.innerHTML = '';
 
-      const today = new Date();
-      const days = [-1, -2, -3];
-
-      days.forEach(dayOffset => {
-        const currentDate = new Date(today);
-        currentDate.setDate(today.getDate() + dayOffset);
-        
-        const year = currentDate.getFullYear();
-        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-        const dayVal = currentDate.getDate();
-        const dateStr = `${year}-${month}-${String(dayVal).padStart(2, '0')}`;
-        
-        const formattedDate = `${String(dayVal).padStart(2, '0')}.${month}`;
-        const dayOfWeek = UKRAINIAN_DAYS[currentDate.getDay()];
-
-        const cachedDay = readHistoryFromCache(dateStr);
-        let h24 = [];
-        
-        if (cachedDay) {
-          h24 = cachedDay;
-        } else {
-          h24 = generateMockDayHistory(S.currentRegionId, S.currentQueue, dateStr);
-        }
-
-        const card = document.createElement('div');
-        card.className = 'history-card';
-        card.onclick = (e) => {
-          if (e.target.classList.contains('matrix-cell')) return;
-          card.classList.toggle('expanded');
-        };
-
-        let lightHours = 0;
-        let outageHours = 0;
-        h24.forEach(v => {
-          if (v === 1) lightHours++;
-          if (v === 2) outageHours++;
-        });
-
-        let cellsHtml = '';
-        h24.forEach(val => {
-          const statusClass = val === 1 ? 'yes' : val === 2 ? 'no' : 'maybe';
-          cellsHtml += `<div class="matrix-cell cell-${statusClass}"></div>`;
-        });
-
-        let slotsHtml = '';
-        let currentGroupStart = 0;
-        let currentGroupStatus = h24[0];
-
-        function addHistorySlot(start, end, status) {
-          const duration = end - start;
-          let badgeText = 'Є світло';
-          let badgeClass = 'tag-std';
-          if (status === 2) {
-            badgeText = 'Немає';
-            badgeClass = 'glow-no';
-          } else if (status === 3) {
-            badgeText = 'Можливо';
-            badgeClass = 'tag-dtek';
-          }
-          const formatHour = (h) => String(h).padStart(2, '0') + ':00';
-          
-          slotsHtml += `
-            <div class="slot-card" style="padding: 8px 12px; margin-bottom: 4px;">
-              <div>
-                <span class="slot-time-range" style="font-size:11.5px;">${formatHour(start)} – ${formatHour(end % 24)}</span>
-                <span style="font-size:10px; color:var(--muted-foreground); margin-left:6px;">(${duration} год)</span>
-              </div>
-              <span class="slot-badge ${badgeClass}" style="font-size:8px; padding:1px 4px;">${badgeText}</span>
-            </div>
-          `;
-        }
-
-        for (let hr = 1; hr < 24; hr++) {
-          if (h24[hr] !== currentGroupStatus) {
-            addHistorySlot(currentGroupStart, hr, currentGroupStatus);
-            currentGroupStart = hr;
-            currentGroupStatus = h24[hr];
-          }
-        }
         addHistorySlot(currentGroupStart, 24, currentGroupStatus);
 
         card.innerHTML = `
@@ -2093,42 +2542,6 @@
       return 'Підгрупа ' + q;
     }
 
-    // Historical cache log
-    function saveScheduleToHistory(apiData) {
-      if (!apiData || !apiData.regions) return;
-      try {
-        const dateToday = apiData.date_today;
-        const dateTomorrow = apiData.date_tomorrow;
-        
-        apiData.regions.forEach(region => {
-          const queues = getEffectiveQueues(region.cpu);
-          queues.forEach(qKey => {
-            const todayS48 = getSlots(region.cpu, qKey, dateToday);
-            if (todayS48) {
-              const todayH24 = slots48to24(todayS48);
-              localStorage.setItem(`svitlo_history_${region.cpu}_${qKey}_${dateToday}`, JSON.stringify(todayH24));
-            }
-            const tomorrowS48 = getSlots(region.cpu, qKey, dateTomorrow);
-            if (tomorrowS48) {
-              const tomorrowH24 = slots48to24(tomorrowS48);
-              localStorage.setItem(`svitlo_history_${region.cpu}_${qKey}_${dateTomorrow}`, JSON.stringify(tomorrowH24));
-            }
-          });
-        });
-      } catch (e) {
-        console.error('Failed saving history', e);
-      }
-    }
-
-    // Read history cache helper
-    function readHistoryFromCache(dateStr) {
-      try {
-        const cacheVal = localStorage.getItem(`svitlo_history_${S.currentRegionId}_${S.currentQueue}_${dateStr}`);
-        return cacheVal ? JSON.parse(cacheVal) : null;
-      } catch (e) {
-        return null;
-      }
-    }
 
     // Fallbacks
     function generateMockApiData() {
@@ -2168,18 +2581,7 @@
       return { date_today: dateToday, date_tomorrow: dateTomorrow, regions };
     }
 
-    function generateMockDayHistory(cpu, queue, dateStr) {
-      const h24 = [];
-      const seed = (parseInt(queue.replace(/\D+/g, '') || '1') * 2 + new Date(dateStr).getDate()) % 6;
-      for (let i = 0; i < 24; i++) {
-        let val = 1;
-        const pattern = (i + seed) % 8;
-        if (pattern === 0 || pattern === 1) val = 2; // Off
-        else if (pattern === 2) val = 3; // Maybe
-        h24.push(val);
-      }
-      return h24;
-    }
+
 
     // Tooltip
     function showTooltip(e, text) {
