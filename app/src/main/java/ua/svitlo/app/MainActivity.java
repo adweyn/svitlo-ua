@@ -82,28 +82,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return true;
             }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                // If OTA update file fails to load, delete it and fall back to bundled asset
-                if (failingUrl != null && failingUrl.contains("update/index.html")) {
-                    File broken = new File(getFilesDir(), "update/index.html");
-                    if (broken.exists()) broken.delete();
-                    view.loadUrl("file:///android_asset/index.html");
-                }
-            }
         });
         webView.setWebChromeClient(new WebChromeClient());
 
-        // Check for local OTA update file, validate it before loading
-        File localUpdate = new File(getFilesDir(), "update/index.html");
-        if (localUpdate.exists() && localUpdate.canRead() && localUpdate.length() > 100 && isValidHtmlFile(localUpdate)) {
-            webView.loadUrl("file://" + localUpdate.getAbsolutePath());
-        } else {
-            // Delete broken/empty/JSON OTA file if it exists
-            if (localUpdate.exists()) localUpdate.delete();
-            webView.loadUrl("file:///android_asset/index.html");
-        }
+        // Always load from bundled assets
+        webView.loadUrl("file:///android_asset/index.html");
 
         // ── AdMob banner ───────────────────────────────────
         MobileAds.initialize(this, status -> {});
@@ -120,19 +103,6 @@ public class MainActivity extends AppCompatActivity {
         registerOtaReceiver();
     }
 
-    private boolean isValidHtmlFile(File file) {
-        try {
-            java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file));
-            String line = br.readLine();
-            br.close();
-            if (line != null) {
-                String trimmed = line.trim();
-                // If it starts with JSON curly brace, it's not HTML!
-                return !trimmed.startsWith("{") && !trimmed.startsWith("[");
-            }
-        } catch (Exception e) {}
-        return false;
-    }
 
     private void registerOtaReceiver() {
         try {
@@ -480,56 +450,7 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public String getAppVersion() { return "5.0"; }
 
-        @JavascriptInterface
-        public void updateWebAssets(String downloadUrl) {
-            new Thread(() -> {
-                try {
-                    java.net.URL url = new java.net.URL(downloadUrl);
-                    java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-                    conn.connect();
-                    if (conn.getResponseCode() == 200) {
-                        java.io.InputStream is = conn.getInputStream();
-                        File updateDir = new File(getFilesDir(), "update");
-                        if (!updateDir.exists()) updateDir.mkdirs();
-                        File updateFile = new File(updateDir, "index.html");
-                        java.io.FileOutputStream fos = new java.io.FileOutputStream(updateFile);
-                        byte[] buffer = new byte[8192];
-                        int len;
-                        while ((len = is.read(buffer)) > 0) {
-                            fos.write(buffer, 0, len);
-                        }
-                        fos.close();
-                        is.close();
-                        runOnUiThread(() -> {
-                            webView.loadUrl("file://" + updateFile.getAbsolutePath());
-                            Toast.makeText(MainActivity.this, "Додаток успішно оновлено!", Toast.LENGTH_SHORT).show();
-                        });
-                    } else {
-                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Помилка сервера при оновленні", Toast.LENGTH_SHORT).show());
-                    }
-                } catch (Exception e) {
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Помилка оновлення: " + e.getMessage(), Toast.LENGTH_LONG).show());
-                }
-            }).start();
-        }
 
-        @JavascriptInterface
-        public void clearWebAssets() {
-            File updateFile = new File(getFilesDir(), "update/index.html");
-            if (updateFile.exists()) {
-                updateFile.delete();
-            }
-            runOnUiThread(() -> {
-                webView.loadUrl("file:///android_asset/index.html");
-                Toast.makeText(MainActivity.this, "Скинуто до заводської версії", Toast.LENGTH_SHORT).show();
-            });
-        }
-
-        @JavascriptInterface
-        public String getCustomWebPath() {
-            File updateFile = new File(getFilesDir(), "update/index.html");
-            return updateFile.exists() ? updateFile.getAbsolutePath() : "";
-        }
 
     }
 

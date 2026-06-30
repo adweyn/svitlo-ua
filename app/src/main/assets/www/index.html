@@ -861,8 +861,6 @@
     </div>
   </div>
 
-
-
   <!-- Header Navigation row with Logo & Theme Selector -->
   <div class="header-logo-row">
     <div class="header-logo-left">
@@ -1100,19 +1098,11 @@
     };
 
     window.onload = function() {
-      // Complete pending OTA version transitions
-      const pendingVersion = localStorage.getItem('svitlo_web_pending_version');
-      if (pendingVersion) {
-        localStorage.setItem('svitlo_web_version', pendingVersion);
-        localStorage.removeItem('svitlo_web_pending_version');
-      }
+
 
       initTheme();
       checkBridge();
-      updateOtaStatusDisplay();
       
-      const currentVer = localStorage.getItem('svitlo_web_version') || '1.0.0';
-      document.getElementById('settings-ota-version-badge').innerText = currentVer;
 
       const savedRegion = localStorage.getItem('svitlo_region_id_v5');
       const savedQueue = localStorage.getItem('svitlo_queue_v5');
@@ -1129,29 +1119,20 @@
       setTimeout(checkForOtaUpdates, 3000);
     };
 
-    // GitHub Version Checker & OTA Updater Logic
+    // GitHub Version Checker — APK updates only
     async function checkForOtaUpdates() {
       if (!window.AndroidBridge) return;
       try {
         const response = await fetch(VERSION_CHECK_URL, { cache: 'no-store' });
         if (response.ok) {
           const remote = await response.json();
-          
-          // 1. Check for native APK update (Google Play Store / Release APK)
           const nativeVer = window.AndroidBridge.getAppVersion() || '5.0';
           if (isVersionNewer(remote.appVersion, nativeVer)) {
             showNativeUpdateBanner(remote);
-            return; // Native update has priority!
-          }
-          
-          // 2. Check for web HTML layout update (OTA)
-          const localVer = localStorage.getItem('svitlo_web_version') || '1.0.0';
-          if (isVersionNewer(remote.webVersion, localVer)) {
-            showWebUpdateBanner(remote);
           }
         }
       } catch (err) {
-        console.warn('OTA version check failed', err);
+        console.warn('Version check failed', err);
       }
     }
 
@@ -1277,84 +1258,10 @@
       startApkDownloadFlow();
     }
 
-    function showWebUpdateBanner(info) {
-      const banner = document.getElementById('update-banner');
-      banner.innerHTML = `
-        <div style="flex:1;">
-          <div style="font-size:12px; font-weight:800; color:var(--foreground);">Оновлення інтерфейсу (в. ${info.webVersion})</div>
-          <div style="font-size:10px; color:var(--muted-foreground); margin-top:2px;">${info.changelog || 'Поліпшення та виправлення інтерфейсу'}</div>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <button class="update-btn-install" onclick="applyRemoteOta('${info.url}', '${info.webVersion}')">Оновити</button>
-          <button onclick="dismissUpdateBanner()" style="background:transparent; border:0; color:var(--muted-foreground); font-size:11px; font-weight:700; cursor:pointer; padding:6px 10px;">Пізніше</button>
-        </div>
-      `;
-      banner.style.display = 'flex';
-      setTimeout(() => banner.classList.add('show'), 100);
-    }
-
     function dismissUpdateBanner() {
       const banner = document.getElementById('update-banner');
       banner.classList.remove('show');
       setTimeout(() => banner.style.display = 'none', 400);
-    }
-
-    function applyRemoteOta(url, newVersion) {
-      if (window.AndroidBridge && window.AndroidBridge.updateWebAssets) {
-        localStorage.setItem('svitlo_web_pending_version', newVersion);
-        window.AndroidBridge.updateWebAssets(url);
-        dismissUpdateBanner();
-      }
-    }
-
-    // OTA UI Overlay controller
-    function toggleSettingsModal(show) {
-      const modal = document.getElementById('settings-modal');
-      if (show) {
-        modal.classList.add('open');
-        updateOtaStatusDisplay();
-      } else {
-        modal.classList.remove('open');
-      }
-    }
-
-    function updateOtaStatusDisplay() {
-      const statusLabel = document.getElementById('settings-ota-status');
-      if (window.AndroidBridge && window.AndroidBridge.getCustomWebPath) {
-        const path = window.AndroidBridge.getCustomWebPath();
-        if (path && path.length > 0) {
-          statusLabel.innerText = 'Оновлено користувачем (OTA)';
-          statusLabel.style.color = 'var(--color-s-yes)';
-        } else {
-          statusLabel.innerText = 'Встановлено заводську версію';
-          statusLabel.style.color = 'var(--muted-foreground)';
-        }
-      }
-    }
-
-    function installOtaUpdate() {
-      const urlInput = document.getElementById('settings-ota-url').value;
-      if (!urlInput || !urlInput.startsWith('http')) {
-        alert('Будь ласка, введіть коректну URL-адресу.');
-        return;
-      }
-      if (window.AndroidBridge && window.AndroidBridge.updateWebAssets) {
-        localStorage.setItem('svitlo_web_pending_version', '9.9.9-custom');
-        window.AndroidBridge.updateWebAssets(urlInput);
-        toggleSettingsModal(false);
-      } else {
-        alert('Ця функція доступна лише всередині Android-додатка.');
-      }
-    }
-
-    function resetOtaUpdate() {
-      if (window.AndroidBridge && window.AndroidBridge.clearWebAssets) {
-        localStorage.removeItem('svitlo_web_version');
-        window.AndroidBridge.clearWebAssets();
-        toggleSettingsModal(false);
-      } else {
-        alert('Ця функція доступна лише всередині Android-додатка.');
-      }
     }
 
     // Native Bridge Hooks
@@ -1515,12 +1422,15 @@
 
     function buildDropdownList(elementId, filterText = '') {
       const panel = document.getElementById(elementId);
+      if (!panel) return;
       panel.innerHTML = '';
       
       const regionsList = S.apiData?.regions || [];
       const filtered = regionsList.filter(r => {
-        const meta = REGION_META[r.cpu] || { name: r.name_ua };
-        return meta.name.toLowerCase().includes(filterText.toLowerCase());
+        if (!r) return false;
+        const meta = REGION_META[r.cpu] || {};
+        const name = meta.name || r.name_ua || '';
+        return name.toLowerCase().includes(filterText.toLowerCase());
       });
 
       if (filtered.length === 0) {
@@ -1535,7 +1445,11 @@
       panel.appendChild(title);
 
       filtered.forEach(region => {
-        const meta = REGION_META[region.cpu] || { name: region.name_ua, flag: '--', provider: 'Обленерго' };
+        if (!region) return;
+        const meta = REGION_META[region.cpu] || {};
+        const name = meta.name || region.name_ua || 'Регіон';
+        const flag = meta.flag || '--';
+        const provider = meta.provider || region.provider || 'Обленерго';
         
         const btn = document.createElement('button');
         btn.className = 'region-item';
@@ -1547,8 +1461,8 @@
 
         btn.innerHTML = `
           <div>
-            <div class="region-name">${meta.flag} ${meta.name}</div>
-            <div class="region-provider">${meta.provider}</div>
+            <div class="region-name">${flag} ${name}</div>
+            <div class="region-provider">${provider}</div>
           </div>
           <span class="region-tag ${tagClass}">${label}</span>
         `;
@@ -1579,11 +1493,15 @@
 
     // Selection Handlers
     function selectRegion(regionCpu) {
+      if (!S.apiData) {
+        S.apiData = generateMockApiData();
+      }
       S.currentRegionId = regionCpu;
       toggleDropdown(false);
       toggleDropdownDash(false);
       
       const region = S.apiData.regions.find(r => r.cpu === regionCpu);
+      if (!region) return;
       const meta = REGION_META[regionCpu] || { name: region.name_ua, provider: 'Обленерго' };
       
       document.getElementById('select-group-title').innerText = `Оберіть чергу для ${meta.name}`;
